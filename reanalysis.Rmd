@@ -1,0 +1,95 @@
+---
+title: "Re-analysing the data from Moffatt et al. (2020): A textbook illustration of the fallacy of the null hypothesis"
+shorttitle: "The fallacy of the null"
+
+author: 
+  - name: Ladislas Nalborczyk
+    affiliation: 1
+    corresponding: yes
+    address: GIPSA-lab, CNRS, Univ. Grenoble Alpes, 11 Rue des Mathématiques, 38400 Saint-Martin-d'Hères, France
+    email: ladislas.nalborczyk@gipsa-lab.fr
+
+affiliation:
+  - id: 1
+    institution: Univ. Grenoble Alpes, CNRS, Grenoble INP, GIPSA-lab, 38000 Grenoble, France
+
+abstract: "Blah blah... Complete source code, reproducible analyses, and figures are available at https://osf.io/ntmgv/."
+
+keywords: NHST, Bayesian, fallacy, reanalysis
+
+csl: csl/apa7.csl
+classoption: man
+linenumbers: yes
+floatsintext: yes
+link-citations: true
+numbersections: false
+
+bibliography: [bib/brms_tutorial.bib, bib/r-references.bib]
+
+nocite: | 
+  @R-base, @R-knitr, @R-rmarkdown, @R-tidyverse, @R-papaja, @R-wordcountaddin,
+  @R-here
+
+output:
+  papaja::apa6_pdf:
+    keep_tex: true
+    highlight: tango
+    latex_engine: xelatex
+---
+
+```{r setup, message = FALSE, warning = FALSE, results = "hide"}
+library(wordcountaddin)
+library(rethinking)
+library(extrafont)
+library(rmarkdown)
+library(tidyverse)
+library(patchwork)
+library(bayesplot)
+library(ggExtra)
+library(papaja)
+library(knitr)
+library(here)
+library(brms)
+
+# setting seed for reproducibility
+set.seed(666)
+
+# setting up knitr options
+knitr::opts_chunk$set(
+  cache = TRUE, eval = TRUE, echo = FALSE,
+  warning = FALSE, message = FALSE,
+  fig.align = "center", dev = "pdf",
+  out.width = "75%", fig.pos = "!htb"
+  )
+
+# counting words in the current .Rmd file
+wordcount <- word_count(knitr::current_input() )
+```
+
+Wordcount (excluding abstract, references, tables, and figures): `r wordcount`
+
+\newpage
+
+<!-- NB: You can add comments using these tags -->
+
+# Introduction
+
+...
+
+# Conclusions
+
+...
+
+# Supplementary materials {#supp}
+
+Supplementary materials, data, reproducible code and figures are available at https://osf.io/ntmgv/.
+
+# Acknowledgements {-}
+
+...
+
+# References {-}
+
+```{r create_r_references, cache = FALSE}
+r_refs(file = "bib/r-references.bib")
+```
