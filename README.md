@@ -1,0 +1,3 @@
+# Re-analysing the data from Moffatt et al. (2020): A textbook illustration of the fallacy of the null hypothesis
+
+This repository contains the code for the paper by Nalborczyk (2020)...

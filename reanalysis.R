@@ -1,3 +1,11 @@
+################################################################
+# Reanalysing the data from Moffatt et al. (2020)
+# ----------------------------------------------------------
+# Ladislas Nalborczyk
+# Last updated on 23.09.2020
+# https://github.com/lnalborczyk/inner_experience_EMG
+#########################################################
+
 library(ggbeeswarm)
 library(tidyverse)
 library(patchwork)
@@ -400,7 +408,8 @@ pp_check(varying_effects, resp = "OOI")
 # simulating data from the posterior
 # (for new, that is, non-observed, participants from the same population)
 # https://bookdown.org/content/4857/models-with-memory.html#multilevel-posterior-predictions
-################################################################################################
+# https://bookdown.org/content/4857/models-with-memory.html#posterior-prediction-for-new-clusters
+###################################################################################################
 
 # extracting posterior samples from varying-effects model
 post <- posterior_samples(varying_effects)
@@ -408,8 +417,30 @@ post <- posterior_samples(varying_effects)
 # number of simulated participants
 n_ppts <- 200
 
-# what are the conditions?
-nd <- distinct(df2, condition) %>% arrange(condition)
+# for the 3 initials conditions and 200 new participants
+# nd <- distinct(df2, condition) %>% arrange(condition)
+nd <- crossing(distinct(df2, condition), data.frame(ID = 101:(101 + n_ppts - 1) ) )
+
+# simulating data
+# simulated_data <- fitted(
+#     varying_effects,
+#     newdata = nd,
+#     # probs = c(.1, .9),
+#     allow_new_levels = TRUE,
+#     sample_new_levels = "gaussian",
+#     summary = FALSE,
+#     # nsamples = n_ppts
+#     nsamples = 1
+#     ) %>% 
+#     data.frame() %>%
+#     # set_names(1:4) %>%
+#     # mutate(iter = 1:n_ppts) %>% 
+#     # pivot_longer(-iter) %>%
+#     pivot_longer(cols = 1:ncol(.) ) %>%
+#     # mutate(ID = rep(101:200, 3) ) %>% head
+#     separate(col = name, into = c("condition", "muscle"), sep = "\\.") %>%
+#     mutate(condition = factor(condition, labels = nd$condition) ) %>%
+#     mutate(muscle = factor(muscle) )
 
 # simulating data
 simulated_data <- fitted(
@@ -419,14 +450,18 @@ simulated_data <- fitted(
     allow_new_levels = TRUE,
     sample_new_levels = "gaussian",
     summary = FALSE,
-    nsamples = n_ppts
-    ) %>% 
-    data.frame() %>% 
-    # set_names(1:4) %>% 
-    mutate(iter = 1:n_ppts) %>% 
-    pivot_longer(-iter) %>%
-    separate(col = name, into = c("condition", "muscle"), sep = "\\.") %>%
-    mutate(condition = factor(condition, labels = nd$condition) ) %>%
+    # nsamples = n_ppts
+    nsamples = 1
+    )[1, , ] %>% 
+    data.frame() %>%
+    bind_cols(nd) %>%
+    # set_names(1:4) %>%
+    # mutate(iter = 1:n_ppts) %>% 
+    # pivot_longer(-iter) %>%
+    # mutate(ID = rep(101:200, 3) ) %>% head
+    # separate(col = name, into = c("condition", "muscle"), sep = "\\.") %>%
+    mutate(condition = factor(condition, labels = unique(nd$condition) ) ) %>%
+    pivot_longer(cols = FRO:OOI, names_to = "muscle") %>%
     mutate(muscle = factor(muscle) )
 
 # plotting these simulated data
@@ -487,9 +522,8 @@ simulated_data %>%
 ############################################################
 
 # reshaping the simulated data
-simulated_data_wide <- simulated_data%>%
-    pivot_wider(names_from = muscle, values_from = value) %>%
-    rename(ID = iter)
+simulated_data_wide <- simulated_data %>%
+    pivot_wider(names_from = muscle, values_from = value) # %>% rename(ID = iter)
 
 # fitting the model
 simulated_data_varying_effects <- brm(
@@ -656,4 +690,85 @@ overall_results %>%
 # Does everyone?
 ################################################
 
-# ... 
+# priors for the unconstrained model
+priors_unconstrained_model <- c(
+    prior(normal(0, 1), class = Intercept),
+    prior(normal(0, 1), class = b),
+    prior(exponential(1), class = sigma)
+    )
+
+# fitting the model
+unconstrained_model <- brm(
+    OOI ~ 1 + condition,
+    family = gaussian(),
+    prior = priors_unconstrained_model,
+    data = df2,
+    chains = 4, cores = detectCores(),
+    warmup = 2000, iter = 5000,
+    control = list(adapt_delta = 0.95),
+    sample_prior = TRUE,
+    file = here("models/unconstrained_model")
+    )
+
+# priors for the positive-effects model
+priors_positive_effects_model <- c(
+    prior(normal(0, 1), class = Intercept),
+    # with a lower bound on 0
+    prior(normal(0, 1), class = b, lb = 0),
+    prior(exponential(1), class = sigma)
+    )
+
+# fitting the model
+positive_effects_model <- brm(
+    OOI ~ 1 + condition,
+    family = gaussian(),
+    prior = priors_positive_effects_model,
+    data = df2,
+    chains = 4, cores = detectCores(),
+    warmup = 2000, iter = 5000,
+    control = list(adapt_delta = 0.95),
+    sample_prior = TRUE,
+    file = here("models/positive_effects_model")
+    )
+
+# priors for the common-effect model
+priors_common_effect_model <- c(
+    prior(normal(0, 1), class = Intercept),
+    # with a lower bound on 0
+    prior(normal(0, 1), class = b, lb = 0),
+    prior(exponential(1), class = sigma)
+    )
+
+# fitting the model
+common_effect_model  <- brm(
+    OOI ~ 1 + condition,
+    family = gaussian(),
+    prior = priors_common_effect_model,
+    data = df2,
+    chains = 4, cores = detectCores(),
+    warmup = 2000, iter = 5000,
+    control = list(adapt_delta = 0.95),
+    sample_prior = TRUE,
+    file = here("models/common_effect_model")
+    )
+
+# priors for the common-effect model
+priors_null_model <- c(
+    prior(normal(0, 1), class = Intercept),
+    # with a lower bound on 0
+    prior(normal(0, 1), class = b, lb = 0),
+    prior(exponential(1), class = sigma)
+    )
+
+# fitting the model
+null_model  <- brm(
+    OOI ~ 1 + condition,
+    family = gaussian(),
+    prior = priors_null_model,
+    data = df2,
+    chains = 4, cores = detectCores(),
+    warmup = 2000, iter = 5000,
+    control = list(adapt_delta = 0.95),
+    sample_prior = TRUE,
+    file = here("models/null_model")
+    )
