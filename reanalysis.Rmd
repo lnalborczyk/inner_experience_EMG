@@ -1,55 +1,50 @@
 ---
 title: "Re-analysing the data from Moffatt et al. (2020): A textbook illustration of the fallacy of the null hypothesis"
 shorttitle: "The fallacy of the null"
-
 author: 
   - name: Ladislas Nalborczyk
     affiliation: 1
     corresponding: yes
     address: GIPSA-lab, CNRS, Univ. Grenoble Alpes, 11 Rue des Mathématiques, 38400 Saint-Martin-d'Hères, France
     email: ladislas.nalborczyk@gipsa-lab.fr
-
 affiliation:
   - id: 1
     institution: Univ. Grenoble Alpes, CNRS, Grenoble INP, GIPSA-lab, 38000 Grenoble, France
-
-abstract: "Blah blah... Complete source code, reproducible analyses, and figures are available at https://osf.io/ntmgv/."
-
-keywords: NHST, Bayesian, fallacy, reanalysis
-
+abstract: "Moffatt et al. (2020) reported the results of an experiment (N = 26 in the final sample) comparing the facial (surface) electromyographic correlates of mental rumination and distraction, following an experimentally induced stressful event. Based on the observation... We show ou this conclusion seems at best hasty... Indeed, concluding on the null, relation between self-reports and physiological measures... Although the question Moffatt et al. (2020) pursued if of interest, and mehods... it is unclear whether this contribution really adds to the current knowledge... Complete source code, reproducible analyses, and figures are available at https://github.com/lnalborczyk/inner_experience_EMG."
+keywords: NHST, Bayesian, fallacy, reanalysis, inner speech, rumination, electromyography
 csl: csl/apa7.csl
 classoption: man
 linenumbers: yes
 floatsintext: yes
 link-citations: true
 numbersections: false
-
 bibliography: [bib/brms_tutorial.bib, bib/r-references.bib]
-
 nocite: | 
   @R-base, @R-knitr, @R-rmarkdown, @R-tidyverse, @R-papaja, @R-wordcountaddin,
   @R-here
-
 output:
   papaja::apa6_pdf:
     keep_tex: true
     highlight: tango
     latex_engine: xelatex
+editor_options: 
+  chunk_output_type: console
 ---
 
-```{r setup, message = FALSE, warning = FALSE, results = "hide"}
+```{r setup, include = FALSE, message = FALSE, warning = FALSE}
 library(wordcountaddin)
-library(rethinking)
-library(extrafont)
+library(ggbeeswarm)
 library(rmarkdown)
 library(tidyverse)
 library(patchwork)
 library(bayesplot)
 library(ggExtra)
 library(papaja)
+library(readxl)
 library(knitr)
+library(BEST)
 library(here)
-library(brms)
+library(glue)
 
 # setting seed for reproducibility
 set.seed(666)
@@ -59,7 +54,7 @@ knitr::opts_chunk$set(
   cache = TRUE, eval = TRUE, echo = FALSE,
   warning = FALSE, message = FALSE,
   fig.align = "center", dev = "pdf",
-  out.width = "75%", fig.pos = "!htb"
+  out.width = "100%", fig.pos = "!htb"
   )
 
 # counting words in the current .Rmd file
@@ -76,13 +71,210 @@ Wordcount (excluding abstract, references, tables, and figures): `r wordcount`
 
 ...
 
-# Conclusions
+# Some thoughts on the data
+
+```{r importing_data}
+# importing data
+df <- read_excel("data/RUM_master_data.xlsx")
+
+# data reshaping (from wide to long)
+# NB: 26 participants in the final dataset...
+
+df2 <- df %>%
+    select(ID, order = Order, RUM_FRO_MAX_ln:BAS_OOI_MAX_ln) %>%
+    na.omit %>%
+    # reshapes data from wide to long format
+    pivot_longer(
+        cols = starts_with(c("RUM", "DIS", "BAS") ),
+        names_to = "condition",
+        # names_prefix = "wk",
+        values_to = "value",
+        values_drop_na = TRUE
+        ) %>%
+    separate(
+        col = condition,
+        into = c("condition", "muscle"),
+        sep = "_", extra = "merge"
+        ) %>%
+    # extracts muscle name
+    mutate(muscle = substr(muscle, 1, 3) ) %>%
+    # from long to wide
+    pivot_wider(names_from = muscle, values_from = value)
+```
+
+```{r babar, fig.cap = "General plot (N = 26)..."}
+# position for groups
+pd <- position_dodge(0.8)
+
+# plotting the dtaa
+df %>%
+    select(ID, order = Order, RUM_FRO_MAX_ln:BAS_OOI_MAX_ln) %>%
+    na.omit %>%
+    # reshapes data from wide to long format
+    pivot_longer(
+        cols = starts_with(c("RUM", "DIS", "BAS") ),
+        names_to = "condition",
+        # names_prefix = "wk",
+        values_to = "value",
+        values_drop_na = TRUE
+        ) %>%
+    separate(
+        col = condition,
+        into = c("condition", "muscle"),
+        sep = "_", extra = "merge"
+        ) %>%
+    # mutate(order = factor(order) ) %>%
+    # plots the data
+    ggplot(aes(x = condition, y = value) ) +
+    # violin plots
+    geom_violin(
+        scale = "count",
+        fill = "black",
+        alpha = 0.2,
+        colour = "white",
+        position = pd,
+        # adjust = 0.8,
+        # draw_quantiles = 0.5,
+        show.legend = FALSE
+        ) +
+    # plotting individual data points
+    geom_dotplot(
+        stackdir = "center",
+        binaxis = "y",
+        position = pd,
+        # binwidth = 1,
+        dotsize = 0.5,
+        alpha = 0.3
+        ) +
+    stat_summary(
+        fun.y = mean,
+        geom = "line", size = 1,
+        # aes(group = interaction(muscle, order) ),
+        aes(group = muscle),
+        position = pd,
+        show.legend = FALSE
+        ) +
+    # plotting means
+    stat_summary(
+        fun.y = "mean",
+        geom = "point", shape = 16, size = 3,
+        position = pd,
+        show.legend = TRUE
+        ) +
+    # plotting confidence intervals
+    stat_summary(
+        fun.data = mean_cl_normal,
+        geom = "errorbar", size = 1, width = 0,
+        fun.args = list(mult = 1.96),
+        show.legend = FALSE,
+        position = pd
+        ) +
+    # geom_point(alpha = 0.25, size = 0.5) + 
+    # alxtheme +
+    facet_grid(~muscle, scales = "free") +
+    # scale_color_manual (values = colors2) +
+    # scale_fill_manual (values = colors2) +
+    labs(x = "Condition", y = "EMG log-amplitude") +
+    # theme(legend.title = element_blank() ) +
+    # forces lower xlim to 0
+    # coord_cartesian(xlim = c(0, 1) ) +
+    theme_bw(base_size = 12) +
+    scale_colour_brewer(palette = "Dark2", direction = 1) +
+    scale_fill_brewer(palette = "Dark2", direction = 1)
+```
+
+...
+
+## Concluding on the null from low-powered studies
+
+https://theethicalskeptic.com/2015/08/17/the-four-types-of-null-hypothesis-fallacy/...
+
+```{r}
+# importing data
+# df <- read_excel("data/RUM_master_data.xlsx")
+```
+
+Unfortunately, the same line of reasoning applies for testing the effect of the order, which is even less powered than the test of the main effect of interest, rendering it practically uninformative...
+
+> "In order to test this, a Bayesian paired samples t-test was conducted for the peak log values of muscle activity between the rumination and distraction conditions. This revealed strong evidence in favour of the alternative hypothesis for the FRO muscle (B10 = 18.79), and moderate evidence in favour of the null hypothesis for the OOS (B10 = 0.232) and OOI (B10 = 0.278) muscles, according to current guidelines for interpreting Bayes factors [43]."
+
+...
+
+## Does everyone?
+
+...
+
+```{r everyone, fig.cap = "General plot (mean and 95\\% CI)... showing the inter-individual variability..."}
+# does everyone plot
+df2 %>%
+    pivot_longer(cols = FRO:OOI, names_to = "muscle") %>%
+    pivot_wider(names_from = condition, values_from = value) %>%
+    mutate(ruminator = ifelse(RUM > DIS, 1, 0) ) %>%
+    mutate(ruminator = as.factor(ruminator) ) %>%
+    pivot_longer(cols = RUM:BAS, names_to = "condition") %>%
+    ggplot(aes(x = condition, y = value, colour = ruminator, fill = ruminator) ) +
+    # violin plots
+    geom_violin(
+        scale = "count",
+        fill = "black",
+        alpha = 0.2,
+        colour = "white",
+        position = pd,
+        # adjust = 0.8,
+        # draw_quantiles = 0.5,
+        show.legend = FALSE
+        ) +
+    # plotting individual data points
+    # geom_quasirandom(alpha = 0.3) +
+    geom_point(size = 2, alpha = 0.8, show.legend = FALSE) +
+    geom_line(aes(group = ID), size = 1, alpha = 0.8, show.legend = FALSE) +
+    # plitting the by-group mean
+    # stat_summary(
+    #     fun.y = mean,
+    #     geom = "line", size = 2,
+    #     aes(group = interaction(muscle, ruminator) ),
+    #     position = pd,
+    #     show.legend = FALSE
+    #     ) +
+    # plotting means
+    # stat_summary(
+    #     fun.y = "mean",
+    #     geom = "point", shape = 16, size = 4,
+    #     position = pd,
+    #     show.legend = TRUE
+    #     ) +
+    # plotting confidence intervals
+    # stat_summary(
+    #     fun.data = mean_cl_normal,
+    #     geom = "errorbar", size = 2, width = 0,
+    #     fun.args = list(mult = 1.96),
+    #     show.legend = FALSE,
+    #     position = pd
+    #     ) +
+    # facetting by muscle
+    facet_wrap(~muscle) +
+    # axis labels
+    labs(x = "Condition", y = "EMG log-amplitude") +
+    # forces lower xlim to 0
+    # coord_cartesian(xlim = c(0, 1) ) +
+    theme_bw(base_size = 12) +
+    scale_colour_brewer(palette = "Dark2", direction = -1) +
+    scale_fill_brewer(palette = "Dark2", direction = -1)
+```
+
+Huge inter-individual variability... which leads to the next point, what is the relation between self-reports and EMG?
+
+## Relation between self-report and EMG correlates
+
+...
+
+# Discussion and conclusions
 
 ...
 
 # Supplementary materials {#supp}
 
-Supplementary materials, data, reproducible code and figures are available at https://osf.io/ntmgv/.
+Reproducible code and figures are available at https://github.com/lnalborczyk/inner_experience_EMG.
 
 # Acknowledgements {-}
 

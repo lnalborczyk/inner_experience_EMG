@@ -295,6 +295,63 @@ df2 <- df %>%
     # from long to wide
     pivot_wider(names_from = muscle, values_from = value)
 
+# plotting the baseline-normalised EMG-aplitude
+df2 %>%
+    pivot_longer(cols = FRO:OOI, names_to = "muscle") %>%
+    pivot_wider(names_from = condition, values_from = value) %>%
+    mutate(DIS_bas = DIS - BAS, RUM_bas = RUM - BAS) %>%
+    select(ID, order, muscle, DIS_bas, RUM_bas) %>%
+    pivot_longer(cols = DIS_bas:RUM_bas, names_to = "condition") %>%
+    ggplot(aes(x = condition, y = value) ) +
+    # violin plots
+    geom_violin(
+        scale = "count",
+        fill = "black",
+        alpha = 0.2,
+        colour = "white",
+        position = pd,
+        # adjust = 0.8,
+        # draw_quantiles = 0.5,
+        show.legend = FALSE
+    ) +
+    # plotting individual data points
+    geom_quasirandom(alpha = 0.3) +
+    # plitting the by-group mean
+    stat_summary(
+        fun.y = mean,
+        geom = "line", size = 1,
+        aes(group = muscle),
+        position = pd,
+        show.legend = FALSE
+    ) +
+    # plotting means
+    stat_summary(
+        fun.y = "mean",
+        geom = "point", shape = 16, size = 3,
+        position = pd,
+        show.legend = TRUE
+    ) +
+    # plotting confidence intervals
+    stat_summary(
+        fun.data = mean_cl_normal,
+        geom = "errorbar", size = 1, width = 0,
+        fun.args = list(mult = 1.96),
+        show.legend = FALSE,
+        position = pd
+    ) +
+    # facetting by muscle
+    facet_wrap(~muscle) +
+    # axis labels
+    labs(
+        x = "Condition", y = "EMG log-amplitude",
+        title = paste0("General plot for (mean and 95% CI)")
+    ) +
+    # forces lower xlim to 0
+    # coord_cartesian(xlim = c(0, 1) ) +
+    theme_bw(base_size = 12) +
+    scale_colour_brewer(palette = "Dark2", direction = 1) +
+    scale_fill_brewer(palette = "Dark2", direction = 1)
+
 #############################################
 # Bayesian multilevel models
 ########################################
@@ -360,7 +417,7 @@ plotPost(
     compVal = 0, ROPE = c(-0.1, 0.1)
     )
 
-# priors for the constant-effects model
+# priors for the varying-effects model
 priors_varying <- c(
     prior(normal(0, 10), class = Intercept, resp = "FRO"),
     prior(normal(0, 1), class = b, resp = "FRO"),
@@ -390,7 +447,7 @@ varying_effects <- brm(
     )
 
 # comparing the models
-waic(constant_effects, varying_effects)
+# waic(constant_effects, varying_effects)
 
 # checking assumptions
 plot(density(residuals(constant_effects) ) )
@@ -404,6 +461,46 @@ pp_check(varying_effects, resp = "FRO")
 pp_check(varying_effects, resp = "OOS")
 pp_check(varying_effects, resp = "OOI")
 
+# baseline-normalised EMG amplitude
+df3 <- df2 %>%
+    pivot_longer(cols = FRO:OOI, names_to = "muscle") %>%
+    pivot_wider(names_from = condition, values_from = value) %>%
+    mutate(DIS_bas = DIS - BAS, RUM_bas = RUM - BAS) %>%
+    select(ID, order, muscle, DIS_bas, RUM_bas) %>%
+    pivot_longer(cols = DIS_bas:RUM_bas, names_to = "condition") %>%
+    mutate(condition_contrast = ifelse(condition == "RUM_bas", 0.5, -0.5) ) %>%
+    pivot_wider(names_from = muscle, values_from = value)
+
+# priors for the varying-effects model
+priors_varying_baseline <- c(
+    # prior(normal(0, 10), class = Intercept, resp = "FRO"),
+    # prior(normal(0, 1), class = b, resp = "FRO"),
+    # prior(exponential(1), class = sigma, resp = "FRO"),
+    # prior(exponential(1), class = sd, resp = "FRO"),
+    # prior(normal(0, 10), class = Intercept, resp = "OOS"),
+    # prior(normal(0, 1), class = b, resp = "OOS"),
+    # prior(exponential(1), class = sigma, resp = "OOS"),
+    # prior(exponential(1), class = sd, resp = "OOS"),
+    prior(normal(0, 1), class = Intercept),
+    prior(normal(0, 1), class = b),
+    prior(exponential(1), class = sigma),
+    prior(exponential(1), class = sd)
+    # prior(lkj(2), class = cor)
+    )
+
+# fitting the model
+varying_effects_baseline <- brm(
+    OOI ~ 1 + condition_contrast + (1 | ID),
+    family = gaussian(),
+    prior = priors_varying_baseline,
+    data = df3,
+    chains = 4, cores = detectCores(),
+    warmup = 2000, iter = 5000,
+    control = list(adapt_delta = 0.99),
+    sample_prior = TRUE,
+    file = here("models/varying_effects_baseline_OOI")
+    )
+
 ########################################################################################################
 # simulating data from the posterior
 # (for new, that is, non-observed, participants from the same population)
@@ -415,11 +512,19 @@ pp_check(varying_effects, resp = "OOI")
 post <- posterior_samples(varying_effects)
 
 # number of simulated participants
-n_ppts <- 200
+n_ppts <- 100
 
 # for the 3 initials conditions and 200 new participants
 # nd <- distinct(df2, condition) %>% arrange(condition)
-nd <- crossing(distinct(df2, condition), data.frame(ID = 101:(101 + n_ppts - 1) ) )
+# nd <- crossing(
+#     distinct(df3, condition_contrast),
+#     data.frame(ID = as.numeric(201:(201 + n_ppts - 1) ) )
+#     )
+
+nd <- crossing(
+    distinct(df2, condition),
+    data.frame(ID = as.numeric(201:(201 + n_ppts - 1) ) )
+    )
 
 # simulating data
 # simulated_data <- fitted(
@@ -443,7 +548,7 @@ nd <- crossing(distinct(df2, condition), data.frame(ID = 101:(101 + n_ppts - 1) 
 #     mutate(muscle = factor(muscle) )
 
 # simulating data
-simulated_data <- fitted(
+simulated_data <- posterior_predict(
     varying_effects,
     newdata = nd,
     # probs = c(.1, .9),
@@ -452,17 +557,32 @@ simulated_data <- fitted(
     summary = FALSE,
     # nsamples = n_ppts
     nsamples = 1
-    )[1, , ] %>% 
+    )[1, , ] %>%
     data.frame() %>%
     bind_cols(nd) %>%
     # set_names(1:4) %>%
-    # mutate(iter = 1:n_ppts) %>% 
+    # mutate(iter = 1:n_ppts) %>%
     # pivot_longer(-iter) %>%
     # mutate(ID = rep(101:200, 3) ) %>% head
     # separate(col = name, into = c("condition", "muscle"), sep = "\\.") %>%
     mutate(condition = factor(condition, labels = unique(nd$condition) ) ) %>%
     pivot_longer(cols = FRO:OOI, names_to = "muscle") %>%
     mutate(muscle = factor(muscle) )
+
+# simulated_data <- posterior_predict(
+#     varying_effects_baseline,
+#     newdata = nd,
+#     # probs = c(.1, .9),
+#     allow_new_levels = TRUE,
+#     sample_new_levels = "gaussian",
+#     summary = FALSE,
+#     nsamples = 1
+#     )[1, ] %>% 
+#     data.frame() %>%
+#     bind_cols(nd) %>%
+#     rename(OOI = ".") %>%
+#     mutate(OOI = as.numeric(OOI), ID = as.factor(ID) ) %>%
+#     ungroup
 
 # plotting these simulated data
 
@@ -485,9 +605,11 @@ simulated_data %>%
     stat_summary(
         fun.y = mean,
         geom = "line", size = 1,
+        # aes(x = condition, y = value),
         aes(group = muscle),
         position = pd,
         show.legend = FALSE
+        # inherit.aes = FALSE
         ) +
     # plotting means
     stat_summary(
@@ -517,26 +639,70 @@ simulated_data %>%
     scale_colour_brewer(palette = "Dark2", direction = 1) +
     scale_fill_brewer(palette = "Dark2", direction = 1)
 
+# reshaping the simulated data
+simulated_data_wide <- simulated_data %>%
+    pivot_wider(names_from = condition_contrast, values_from = OOI) %>%
+    select(ID, distraction = "-0.5", rumination = "0.5") %>%
+    mutate(difference = rumination - distraction)
+
+library(BayesFactor)
+ttestBF(x = simulated_data_wide$difference)
+
 ######################################################################
 # fitting a model on these data
 ############################################################
 
 # reshaping the simulated data
 simulated_data_wide <- simulated_data %>%
-    pivot_wider(names_from = muscle, values_from = value) # %>% rename(ID = iter)
+    pivot_wider(names_from = muscle, values_from = value) %>%
+    # rename(ID = iter)
+    mutate(ID = as.numeric(ID), condition = as.character(condition) )
+
+# priors for the constant-effects model
+priors_simulated_data <- c(
+    prior(normal(0, 10), class = Intercept, resp = "FRO"),
+    prior(normal(0, 1), class = b, resp = "FRO"),
+    prior(exponential(1), class = sigma, resp = "FRO"),
+    prior(exponential(1), class = sd, resp = "FRO"),
+    prior(normal(0, 10), class = Intercept, resp = "OOS"),
+    prior(normal(0, 1), class = b, resp = "OOS"),
+    prior(exponential(1), class = sigma, resp = "OOS"),
+    prior(exponential(1), class = sd, resp = "OOS"),
+    prior(normal(0, 1), class = Intercept),
+    prior(normal(0, 1), class = b),
+    prior(exponential(1), class = sigma),
+    prior(exponential(1), class = sd)
+    )
 
 # fitting the model
-simulated_data_varying_effects <- brm(
-    mvbind(FRO, OOS, OOI) ~ 1 + condition + (1 | ID),
-    family = gaussian(),
-    prior = priors_varying,
+# simulated_data_varying_effects <- brm(
+#     mvbind(FRO, OOS, OOI) ~ 1 + condition + (1 | ID),
+#     family = gaussian(),
+#     prior = priors_varying,
+#     # prior = priors_simulated_data,
+#     data = simulated_data_wide,
+#     chains = 4,
+#     cores = parallel::detectCores(),
+#     warmup = 2000, iter = 5000,
+#     control = list(adapt_delta = 0.99),
+#     sample_prior = TRUE,
+#     file = here("models/simulated_data_varying_effects")
+#     )
+
+simulated_data_varying_effects <- update(
+    varying_effects,
+    # mvbind(FRO, OOS, OOI) ~ 1 + condition + (1 | ID),
+    # family = gaussian(),
+    # prior = priors_varying,
+    # prior = priors_simulated_data,
     data = simulated_data_wide,
-    chains = 4, cores = detectCores(),
+    chains = 4,
+    cores = parallel::detectCores(),
     warmup = 2000, iter = 5000,
-    control = list(adapt_delta = 0.95),
+    control = list(adapt_delta = 0.99),
     sample_prior = TRUE,
     file = here("models/simulated_data_varying_effects")
-    )
+)
 
 # model summary
 summary(simulated_data_varying_effects)
@@ -605,14 +771,13 @@ simulating_bfs <- function (n_obs) {
     nd <- distinct(df2, condition) %>% arrange(condition)
     
     # simulating data
-    bf_simulated_data <- fitted(
+    bf_simulated_data <- posterior_predict(
         varying_effects,
         newdata = nd,
-        # probs = c(.1, .9),
         allow_new_levels = TRUE,
         sample_new_levels = "gaussian",
         summary = FALSE,
-        nsamples = n_ppts
+        nsamples = 1
         ) %>% 
         data.frame() %>% 
         mutate(iter = 1:n_ppts) %>% 
@@ -622,7 +787,7 @@ simulating_bfs <- function (n_obs) {
         mutate(muscle = factor(muscle) )
     
     # reshaping the simulated data
-    bf_simulated_data_wide <- bf_simulated_data%>%
+    bf_simulated_data_wide <- bf_simulated_data %>%
         pivot_wider(names_from = muscle, values_from = value) %>%
         rename(ID = iter)
     
@@ -689,6 +854,65 @@ overall_results %>%
 ###############################################################
 # Does everyone?
 ################################################
+
+# does everyone plot
+df2 %>%
+    pivot_longer(cols = FRO:OOI, names_to = "muscle") %>%
+    pivot_wider(names_from = condition, values_from = value) %>%
+    mutate(ruminator = ifelse(RUM > DIS, 1, 0) ) %>%
+    mutate(ruminator = as.factor(ruminator) ) %>%
+    pivot_longer(cols = RUM:BAS, names_to = "condition") %>%
+    ggplot(aes(x = condition, y = value, colour = ruminator, fill = ruminator) ) +
+    # violin plots
+    geom_violin(
+        scale = "count",
+        fill = "black",
+        alpha = 0.2,
+        colour = "white",
+        position = pd,
+        # adjust = 0.8,
+        # draw_quantiles = 0.5,
+        show.legend = FALSE
+        ) +
+    # plotting individual data points
+    # geom_quasirandom(alpha = 0.3) +
+    geom_point(size = 2, alpha = 0.8, show.legend = FALSE) +
+    geom_line(aes(group = ID), size = 1, alpha = 0.8, show.legend = FALSE) +
+    # plitting the by-group mean
+    # stat_summary(
+    #     fun.y = mean,
+    #     geom = "line", size = 2,
+    #     aes(group = interaction(muscle, ruminator) ),
+    #     position = pd,
+    #     show.legend = FALSE
+    #     ) +
+    # plotting means
+    # stat_summary(
+    #     fun.y = "mean",
+    #     geom = "point", shape = 16, size = 4,
+    #     position = pd,
+    #     show.legend = TRUE
+    #     ) +
+    # plotting confidence intervals
+    # stat_summary(
+    #     fun.data = mean_cl_normal,
+    #     geom = "errorbar", size = 2, width = 0,
+    #     fun.args = list(mult = 1.96),
+    #     show.legend = FALSE,
+    #     position = pd
+    #     ) +
+    # facetting by muscle
+    facet_wrap(~muscle) +
+    # axis labels
+    labs(
+        x = "Condition", y = "EMG log-amplitude",
+        title = paste0("General plot for (mean and 95% CI)")
+        ) +
+    # forces lower xlim to 0
+    # coord_cartesian(xlim = c(0, 1) ) +
+    theme_bw(base_size = 12) +
+    scale_colour_brewer(palette = "Dark2", direction = -1) +
+    scale_fill_brewer(palette = "Dark2", direction = -1)
 
 # priors for the unconstrained model
 priors_unconstrained_model <- c(
