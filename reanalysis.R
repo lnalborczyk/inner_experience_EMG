@@ -853,12 +853,8 @@ overall_results <- data.frame(
     bf_oos = numeric(length = length(sample_size) )
     )
 
-# initialises the progress bar
-# pb <- txtProgressBar(min = 0, max = nrow(overall_results), initial = 0) 
-
 # looping over these sample sizes
-# for (i in 1:nrow(empty_results) ) {
-for (i in 1:2) {
+for (i in 1:nrow(empty_results) ) {
     
     if (i == 1) {
         
@@ -873,7 +869,7 @@ for (i in 1:2) {
     # gets BFs for this sample size and stores it in "overall_results"
     overall_results[i, 3:5] <- simulating_bfs(n_obs = overall_results[i, ]$nobs)
     
-    if (i == 2) {
+    if (i == nrow(empty_results) ) {
         
         # time of simulation end
         stop_time <- Sys.time()
