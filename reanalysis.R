@@ -316,7 +316,7 @@ df2 %>%
     ) +
     # plotting individual data points
     geom_quasirandom(alpha = 0.3) +
-    # plitting the by-group mean
+    # splitting the by-group mean
     stat_summary(
         fun.y = mean,
         geom = "line", size = 1,

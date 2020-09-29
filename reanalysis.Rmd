@@ -1,7 +1,6 @@
 ---
 title: "Re-analysing the data from @moffatt_inner_2020: A textbook illustration of the absence of evidence fallacy"
-
-shorttitle: "The fallacy of the null"
+shorttitle: "The absence of evidence fallacy"
 
 author: 
   - name: Ladislas Nalborczyk
@@ -239,6 +238,9 @@ ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"]
 We fitted a multivariate Bayesian regression model on these data... then we generated new datasets from the posterior predictive distribution... and computed the Bayes factor in favour of the alternative hypothesis ($BF_{10}$) for varying sample sizes from 20 to 200 participants (by increments of 10 participants) with $10$ simulations (i.e., 1000 simulated datasets) for each sample size...
 
 ```{r simulated-power, fig.width = 10, fig.cap = "Average natural logarithm of the Bayes factor in favour of the alternative hypothesis (BF10), along with its standard error, computed over 1000 datasets of increasing size simulated from the posterior predictive distribution of the varying-intercept multivariate Bayesian regresion model."}
+# running the simulations
+# source("code/bf_simulation.R")
+
 # loading the results
 load(file = "results/overall_results.Rda")
 
@@ -304,16 +306,16 @@ df2 %>%
     # plots the data
     ggplot(aes(x = condition, y = value, colour = order, fill = order) ) +
     # violin plots
-    geom_violin(
-        scale = "count",
-        fill = "black",
-        alpha = 0.15,
-        colour = "white",
-        position = pd,
-        # adjust = 0.8,
-        draw_quantiles = 0.5,
-        show.legend = FALSE
-        ) +
+    # geom_violin(
+    #     scale = "count",
+    #     fill = "black",
+    #     alpha = 0.15,
+    #     colour = "white",
+    #     position = pd,
+    #     # adjust = 0.8,
+    #     draw_quantiles = 0.5,
+    #     show.legend = FALSE
+    #     ) +
     # plotting individual data points
     # geom_dotplot(
     #     stackdir = "center",
@@ -347,7 +349,7 @@ df2 %>%
         show.legend = FALSE,
         position = pd
         ) +
-    # facet_wrap(~order*muscle, ncol = 3) +
+    # facetting by muscle
     facet_wrap(~muscle, ncol = 3) +
     labs(x = "Condition", y = "EMG log-amplitude") +
     theme_bw(base_size = 10) +
@@ -355,11 +357,11 @@ df2 %>%
     scale_fill_brewer(palette = "Dark2", direction = 1)
 ```
 
-...@moffatt_inner_2020 say:
+About the order effects, @moffatt_inner_2020 say:
 
-> "Unless otherwise reported, the inclusion of order in which the conditions were completed as a between-subjects variable as part of a mixed-design ANOVA produced no significant main effects or interac- tions involving order."
+> "Unless otherwise reported, the inclusion of order in which the conditions were completed as a between-subjects variable as part of a mixed-design ANOVA produced no significant main effects or interactions involving order."
 
-Unfortunately, the same line of reasoning applies for testing the effect of the order, which is even less powered than the test of the main effect of interest, rendering it practically uninformative... @sassenhagen_common_2016...
+Unfortunately, the same line of reasoning applies for testing the effect of the order, which is even less powered than the test of the main effect of interest, rendering it practically uninformative...
 
 ## Does everyone?
 
@@ -429,7 +431,7 @@ Huge inter-individual variability... which leads to the next point, what is the 
 
 # Discussion and conclusions
 
-...
+Baseline-standardisation...
 
 # Supplementary materials {#supp}
 
