@@ -2,7 +2,7 @@
 # Reanalysing the data from Moffatt et al. (2020)     #
 # --------------------------------------------------- #
 # Ladislas Nalborczyk                                 #
-# Last updated on 28.09.2020                          #
+# Last updated on 29.09.2020                          #
 # https://github.com/lnalborczyk/inner_experience_EMG #
 #######################################################
 
@@ -812,61 +812,85 @@ simulating_bfs <- function (n_obs) {
         "FRO_conditionRUM - FRO_conditionDIS = 0"
         )
     
-    bf_fro <- 1 / bf_hyp_fro$hypothesis$Evid.Ratio # %>% as.numeric
+    bf_fro <- 1 / bf_hyp_fro$hypothesis$Evid.Ratio
     
     bf_hyp_ooi <- hypothesis(
         bf_simulated_data_varying_effects,
         "OOI_conditionRUM - OOI_conditionDIS = 0"
         )
     
-    bf_ooi <- 1 / bf_hyp_ooi$hypothesis$Evid.Ratio # %>% as.numeric
+    bf_ooi <- 1 / bf_hyp_ooi$hypothesis$Evid.Ratio
     
     bf_hyp_oos <- hypothesis(
         bf_simulated_data_varying_effects,
         "OOS_conditionRUM - OOS_conditionDIS = 0"
         )
     
-    bf_oos <- 1 / bf_hyp_oos$hypothesis$Evid.Ratio # %>% as.numeric
+    bf_oos <- 1 / bf_hyp_oos$hypothesis$Evid.Ratio
     
-    results <- data.frame(
-        n_obs = n_obs,
-        bf_fro = bf_fro,
-        bf_ooi = bf_ooi,
-        bf_oos = bf_oos
-        )
+    # results <- data.frame(
+    #     n_obs = n_obs,
+    #     bf_fro = bf_fro,
+    #     bf_ooi = bf_ooi,
+    #     bf_oos = bf_oos
+    #     )
     
-    return(results)
+    return(c(bf_fro, bf_ooi, bf_oos) )
     
     }
 
 # simulating for some range of sample sizes
-sample_size <- seq.int(from = 20, to = 200, by = 10)
+nsims <- 10
+sample_size <- seq.int(from = 20, to = 200, by = 20)
+sample_size <- rep(sample_size, each = nsims)
+
+# initialising results
+overall_results <- data.frame(
+    nobs = sample_size,
+    nsim = rep(1:nsims, length(sample_size) / nsims),
+    bf_fro = numeric(length = length(sample_size) ),
+    bf_ooi = numeric(length = length(sample_size) ),
+    bf_oos = numeric(length = length(sample_size) )
+    )
+
+# initialises the progress bar
+# pb <- txtProgressBar(min = 0, max = nrow(overall_results), initial = 0) 
 
 # looping over these sample sizes
-for (i in 1:length(sample_size) ) {
+# for (i in 1:nrow(empty_results) ) {
+for (i in 1:2) {
     
-    # prints progression
-    print(paste("Sample size is", sample_size[i]) )
-    
-    # gets BFs for this sample size
-    temp_results <- simulating_bfs(n_obs = sample_size[i])
-    
-    if (!exists("overall_results") ) {
+    if (i == 1) {
         
-        overall_results <- temp_results
-        
-    } else {
-        
-        overall_results <- rbind(overall_results, temp_results)
+        # time of stimulation start
+        start_time <- Sys.time()
         
     }
     
-    rm(temp_results)
+    # prints progression
+    print(paste("Current sample size is", sample_size[i]) )
     
+    # gets BFs for this sample size and stores it in "overall_results"
+    overall_results[i, 3:5] <- simulating_bfs(n_obs = overall_results[i, ]$nobs)
+    
+    if (i == 2) {
+        
+        # time of simulation end
+        stop_time <- Sys.time()
+        
+        # print start and end times
+        print(paste("Start of simulation:", start_time) )
+        print(paste("End of simulation:", stop_time) )
+        
+        # print time difference
+        print(stop_time - start_time)
+        
+    }
+
 }
 
 # end of simulation
-format(Sys.time(), "%H:%M:%S")
+# print(paste("End of simulation:", format(Sys.time(), "%H:%M:%S") ) )
 
 # saving the results
 save(overall_results, file = "results/overall_results.Rda")
@@ -875,11 +899,13 @@ save(overall_results, file = "results/overall_results.Rda")
 overall_results %>%
     na.omit() %>%
     pivot_longer(cols = bf_fro:bf_oos, names_to = "bf_type") %>%
-    ggplot(aes(x = n_obs, y = value, colour = bf_type) ) +
+    # mutate(value = log(value) ) %>%
+    group_by(nobs, bf_type) %>%
+    summarise(across(.cols = value, .fns = list(mean = mean, se = ~sd(.x) / sqrt(nsims) ) ) ) %>%
+    ggplot(aes(x = nobs, y = value_mean, colour = bf_type) ) +
     # geom_hline(yintercept = 0, lty = 3) +
-    # geom_line() +
+    geom_line() +
     geom_point() +
-    # facet_wrap(~bf_type) +
     theme_bw(base_size = 12) +
     labs(x = "Number of participants", y = "Log Bayes factor")
 

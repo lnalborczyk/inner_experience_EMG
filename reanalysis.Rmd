@@ -1,5 +1,5 @@
 ---
-title: "Re-analysing the data from Moffatt et al. (2020): A textbook illustration of the fallacy of the null hypothesis"
+title: "Re-analysing the data from @moffatt_inner_2020: A textbook illustration of the fallacy of the null hypothesis"
 
 shorttitle: "The fallacy of the null"
 
@@ -13,7 +13,7 @@ affiliation:
   - id: 1
     institution: Univ. Grenoble Alpes, CNRS, Grenoble INP, GIPSA-lab, 38000 Grenoble, France
 
-abstract: "Moffatt et al. (2020) reported the results of an experiment (N = 26 in the final sample) comparing the facial (surface) electromyographic correlates of mental rumination and distraction, following an experimentally induced stressor. Based on an absence of significant difference in the perioral EMG-amplitude between the rumination and distraction conditions, Moffatt et al. (2020) concluded that (the *self-reported*) inner experience was unrelated to peripheral muscular activity as assessed using surface electromyography. We suggest this conclusion is hasty and based on waggly evidence. Indeed, concluding on the absence of an effect based on a low-powered statistical test is strongly problematic/uninformative. Moreover, there relation between self-reports and physiological measures... Although the question Moffatt et al. (2020) pursued is of interest, and mehods... Given these limitations, it is unclear whether the target article really adds to the current knowledge. Complete source code, reproducible analyses, and figures are available at https://github.com/lnalborczyk/inner_experience_EMG."
+abstract: "@moffatt_inner_2020 reported the results of an experiment (N = 26 in the final sample) comparing the facial (surface) electromyographic correlates of mental rumination and distraction, following an experimentally induced stressor. Based on the absence of significant difference in the perioral muscular activity between the rumination and distraction conditions, @moffatt_inner_2020 concluded that (the *self-reported*) inner experience was unrelated to peripheral muscular activity as assessed using surface electromyography. We suggest this conclusion is hasty and based on waggly evidence. Indeed, concluding on the absence of an effect based on a low-powered statistical test is strongly problematic/uninformative. Moreover, the relation between self-reports and physiological measures was not *directly* assessed, but only indirectly inferred from differences (or absence thereof) in group means. Given the ample inter-individual variability in these measures (as suggested through our reanalysis), we think inferring the individual-level relation between self-reports and physiolgogical measures from group means is inappropriate. Given these limitations, we conclude that it is unclear whether the target article adds to the current/extent knowledge and we suggest ways foward, both from a theoretical and from a methodological perspective. Complete source code, reproducible analyses, and figures are available at https://github.com/lnalborczyk/inner_experience_EMG."
 
 keywords: NHST, Bayesian, fallacy, reanalysis, inner speech, rumination, electromyography
 
@@ -23,7 +23,7 @@ linenumbers: yes
 floatsintext: yes
 link-citations: true
 numbersections: false
-bibliography: [bib/brms_tutorial.bib, bib/r-references.bib]
+bibliography: [bib/library.bib, bib/r-references.bib]
 
 nocite: | 
   @R-base, @R-knitr, @R-rmarkdown, @R-tidyverse, @R-papaja, @R-wordcountaddin,
@@ -74,16 +74,27 @@ Wordcount (excluding abstract, references, tables, and figures): `r wordcount`
 
 # Introduction
 
-...
+The activity of silently talking to oneself or "inner speech" is a foundational ability... despite its multiple adaptive functions in everyday life, inner speech can go awry and leads to sustained negative... These inner speech "dysfunctions"...
 
-# Some thoughts on the data
+@moffatt_inner_2020, @loevenbruck_cognitive_2018, @grandchamp_condialint_2019, @alderson-day_inner_2015, @wilkinson_auditory_2017, and @perrone-bertolotti_what_2014, @nalborczyk_can_2020, @nalborczyk_introduction_2019, @nalborczyk_orofacial_2017, @nalborczyk_understanding_2019...
+
+The main conclusion from @moffatt_inner_2020 is that inner experience between induced rumination and distraction differs "without a change in electromyographic correlates of inner speech". In other words, their conclusion is that inner experience is unrelated (or loosely related) to the electromyographic correlates of inner speech, which are thought to be represented mostly by the EMG amplitude recorded over the OOI and OOS muscles. However, for this in-sample observation to be of interest in an out-of-sample context (i.e., to be informative of other non-observed individuals, or said otherwise, to brings information about the population), this absence of difference has to be based on... Moreover, a simple visual exploration of the data reveals important variability between individuals in the main effect of interest. That is, some participants had higher perioral (OOS and OOI) muscular activity in the rumination condition than in the distraction condition, and some other participants showed the reverse pattern. This suggests unexplored variation in the determinants of this effects (e.g., the content of the inner experience). Indeed, the relation between the inner experience and the physiological correlates of inner speech production was only inferred from group means. However, given the previous point, this appears highly problematic. We explore each of these limitations and suggests ways forward in the following section.
+
+# Exploring the data
 
 ```{r importing_data}
 # importing data
-df <- read_excel("data/RUM_master_data.xlsx")
+df <- read_excel(path = "data/RUM_master_data.xlsx", sheet = 1)
+
+# importing codebook
+codebook <- read_excel(path = "data/RUM_master_data.xlsx", sheet = 2)
 
 # data reshaping (from wide to long)
 # NB: 26 participants in the final dataset...
+
+# Order in which rumination and distraction inductions were completed
+# 1 = rumination induction completed first
+# 2 = distraction induction completed first
 
 df2 <- df %>%
     select(ID, order = Order, RUM_FRO_MAX_ln:BAS_OOI_MAX_ln) %>%
@@ -107,50 +118,43 @@ df2 <- df %>%
     pivot_wider(names_from = muscle, values_from = value)
 ```
 
-```{r babar, fig.cap = "General plot (N = 26)..."}
+```{r general, fig.cap = "Average log-EMG amplitude by muscle and condition. The black dots and intervals represent the by-group average and 95\\% confidence interval (N = 26). The horizontal white line in the violin plot represents the median. The grey dots represent the individual-level average natural logarithm of the EMG amplitude by muscle and condition."}
 # position for groups
 pd <- position_dodge(0.8)
 
-# plotting the dtaa
-df %>%
-    select(ID, order = Order, RUM_FRO_MAX_ln:BAS_OOI_MAX_ln) %>%
-    na.omit %>%
+# plotting the data
+df2 %>%
     # reshapes data from wide to long format
     pivot_longer(
-        cols = starts_with(c("RUM", "DIS", "BAS") ),
-        names_to = "condition",
-        # names_prefix = "wk",
+        cols = FRO:OOI,
+        names_to = "muscle",
         values_to = "value",
         values_drop_na = TRUE
         ) %>%
-    separate(
-        col = condition,
-        into = c("condition", "muscle"),
-        sep = "_", extra = "merge"
-        ) %>%
-    # mutate(order = factor(order) ) %>%
+    mutate(order = factor(order) ) %>%
     # plots the data
     ggplot(aes(x = condition, y = value) ) +
     # violin plots
     geom_violin(
         scale = "count",
         fill = "black",
-        alpha = 0.2,
+        alpha = 0.15,
         colour = "white",
         position = pd,
         # adjust = 0.8,
-        # draw_quantiles = 0.5,
+        draw_quantiles = 0.5,
         show.legend = FALSE
         ) +
     # plotting individual data points
-    geom_dotplot(
-        stackdir = "center",
-        binaxis = "y",
-        position = pd,
-        # binwidth = 1,
-        dotsize = 0.5,
-        alpha = 0.3
-        ) +
+    # geom_dotplot(
+    #     stackdir = "center",
+    #     binaxis = "y",
+    #     position = pd,
+    #     # binwidth = 1,
+    #     dotsize = 0.5,
+    #     alpha = 0.3
+    #     ) +
+    geom_quasirandom(alpha = 0.3) +
     stat_summary(
         fun.y = mean,
         geom = "line", size = 1,
@@ -174,16 +178,10 @@ df %>%
         show.legend = FALSE,
         position = pd
         ) +
-    # geom_point(alpha = 0.25, size = 0.5) + 
-    # alxtheme +
-    facet_grid(~muscle, scales = "free") +
-    # scale_color_manual (values = colors2) +
-    # scale_fill_manual (values = colors2) +
+    # facet_wrap(~order*muscle, ncol = 3) +
+    facet_wrap(~muscle, ncol = 3) +
     labs(x = "Condition", y = "EMG log-amplitude") +
-    # theme(legend.title = element_blank() ) +
-    # forces lower xlim to 0
-    # coord_cartesian(xlim = c(0, 1) ) +
-    theme_bw(base_size = 12) +
+    theme_bw(base_size = 10) +
     scale_colour_brewer(palette = "Dark2", direction = 1) +
     scale_fill_brewer(palette = "Dark2", direction = 1)
 ```
@@ -199,17 +197,87 @@ https://theethicalskeptic.com/2015/08/17/the-four-types-of-null-hypothesis-falla
 # df <- read_excel("data/RUM_master_data.xlsx")
 ```
 
-Unfortunately, the same line of reasoning applies for testing the effect of the order, which is even less powered than the test of the main effect of interest, rendering it practically uninformative...
+...
 
 > "In order to test this, a Bayesian paired samples t-test was conducted for the peak log values of muscle activity between the rumination and distraction conditions. This revealed strong evidence in favour of the alternative hypothesis for the FRO muscle (B10 = 18.79), and moderate evidence in favour of the null hypothesis for the OOS (B10 = 0.232) and OOI (B10 = 0.278) muscles, according to current guidelines for interpreting Bayes factors [43]."
+
+Unfortunately, the same line of reasoning applies for testing the effect of the order, which is even less powered than the test of the main effect of interest, rendering it practically uninformative...
+
+```{r order, fig.cap = "Average log-EMG amplitude by muscle and condition. The black dots and intervals represent the by-group average and 95\\% confidence interval (N = 26). The horizontal white line in the violin plot represents the median. The grey dots represent the individual-level average natural logarithm of the EMG amplitude by muscle and condition."}
+# position for groups
+pd <- position_dodge(0.8)
+
+# plotting the data
+df2 %>%
+    # reshapes data from wide to long format
+    pivot_longer(
+        cols = FRO:OOI,
+        names_to = "muscle",
+        values_to = "value",
+        values_drop_na = TRUE
+        ) %>%
+    mutate(order = factor(order, labels = c("RUM -> DIS", "DIS -> RUM")) ) %>%
+    # plots the data
+    ggplot(aes(x = condition, y = value, colour = order, fill = order) ) +
+    # violin plots
+    geom_violin(
+        scale = "count",
+        fill = "black",
+        alpha = 0.15,
+        colour = "white",
+        position = pd,
+        # adjust = 0.8,
+        draw_quantiles = 0.5,
+        show.legend = FALSE
+        ) +
+    # plotting individual data points
+    # geom_dotplot(
+    #     stackdir = "center",
+    #     binaxis = "y",
+    #     position = pd,
+    #     # binwidth = 1,
+    #     dotsize = 0.5,
+    #     alpha = 0.3
+    #     ) +
+    geom_quasirandom(alpha = 0.3) +
+    stat_summary(
+        fun.y = mean,
+        geom = "line", size = 1,
+        aes(group = interaction(muscle, order) ),
+        # aes(group = muscle),
+        position = pd,
+        show.legend = FALSE
+        ) +
+    # plotting means
+    stat_summary(
+        fun.y = "mean",
+        geom = "point", shape = 16, size = 3,
+        position = pd,
+        show.legend = TRUE
+        ) +
+    # plotting confidence intervals
+    stat_summary(
+        fun.data = mean_cl_normal,
+        geom = "errorbar", size = 1, width = 0,
+        fun.args = list(mult = 1.96),
+        show.legend = FALSE,
+        position = pd
+        ) +
+    # facet_wrap(~order*muscle, ncol = 3) +
+    facet_wrap(~muscle, ncol = 3) +
+    labs(x = "Condition", y = "EMG log-amplitude") +
+    theme_bw(base_size = 10) +
+    scale_colour_brewer(palette = "Dark2", direction = 1) +
+    scale_fill_brewer(palette = "Dark2", direction = 1)
+```
 
 ...
 
 ## Does everyone?
 
-...
+@haaf_developing_2017...
 
-```{r everyone, fig.cap = "General plot (mean and 95\\% CI)... showing the inter-individual variability..."}
+```{r everyone, fig.cap = "Inter-individual variability in the main effect of interest (i.e., the difference between the rumination and distraction conditions). Green dots and lines represent the average logarithm of the EMG amplitude of participants that showed a higher EMG amplitude in the rumination condition than in the distraction condition, whereas orange dots and lines represent the average logarithm of the EMG amplitude of participants that showed a higher EMG amplitude in the distraction condition than in the rumination condition."}
 # does everyone plot
 df2 %>%
     pivot_longer(cols = FRO:OOI, names_to = "muscle") %>%
@@ -222,17 +290,17 @@ df2 %>%
     geom_violin(
         scale = "count",
         fill = "black",
-        alpha = 0.2,
+        alpha = 0.15,
         colour = "white",
         position = pd,
         # adjust = 0.8,
-        # draw_quantiles = 0.5,
+        draw_quantiles = 0.5,
         show.legend = FALSE
         ) +
     # plotting individual data points
     # geom_quasirandom(alpha = 0.3) +
     geom_point(size = 2, alpha = 0.8, show.legend = FALSE) +
-    geom_line(aes(group = ID), size = 1, alpha = 0.8, show.legend = FALSE) +
+    geom_line(aes(group = ID), size = 0.5, alpha = 0.8, show.legend = FALSE) +
     # plitting the by-group mean
     # stat_summary(
     #     fun.y = mean,
@@ -260,8 +328,6 @@ df2 %>%
     facet_wrap(~muscle) +
     # axis labels
     labs(x = "Condition", y = "EMG log-amplitude") +
-    # forces lower xlim to 0
-    # coord_cartesian(xlim = c(0, 1) ) +
     theme_bw(base_size = 12) +
     scale_colour_brewer(palette = "Dark2", direction = -1) +
     scale_fill_brewer(palette = "Dark2", direction = -1)

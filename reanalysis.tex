@@ -37,7 +37,7 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
 \hypersetup{
-  pdftitle={Re-analysing the data from Moffatt et al.~(2020): A textbook illustration of the fallacy of the null hypothesis},
+  pdftitle={Re-analysing the data from Moffatt et al. (2020): A textbook illustration of the fallacy of the null hypothesis},
   pdflang={en-EN},
   pdfkeywords={NHST, Bayesian, fallacy, reanalysis, inner speech, rumination, electromyography},
   hidelinks,
@@ -133,36 +133,40 @@ Correspondence concerning this article should be addressed to Ladislas Nalborczy
   \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces}%
   {\par}
 
-\title{Re-analysing the data from Moffatt et al.~(2020): A textbook illustration of the fallacy of the null hypothesis}
+\title{Re-analysing the data from Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}): A textbook illustration of the fallacy of the null hypothesis}
 
 \date{}
 
 \abstract{
-Moffatt et al.~(2020) reported the results of an experiment (N = 26 in the final sample) comparing the facial (surface) electromyographic correlates of mental rumination and distraction, following an experimentally induced stressor. Based on an absence of significant difference in the perioral EMG-amplitude between the rumination and distraction conditions, Moffatt et al.~(2020) concluded that (the \emph{self-reported}) inner experience was unrelated to peripheral muscular activity as assessed using surface electromyography. We suggest this conclusion is hasty and based on waggly evidence. Indeed, concluding on the absence of an effect based on a low-powered statistical test is strongly problematic/uninformative. Moreover, there relation between self-reports and physiological measures\ldots{} Although the question Moffatt et al.~(2020) pursued is of interest, and mehods\ldots{} Given these limitations, it is unclear whether the target article really adds to the current knowledge. Complete source code, reproducible analyses, and figures are available at \url{https://github.com/lnalborczyk/inner_experience_EMG}.
+Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) reported the results of an experiment (N = 26 in the final sample) comparing the facial (surface) electromyographic correlates of mental rumination and distraction, following an experimentally induced stressor. Based on the absence of significant difference in the perioral muscular activity between the rumination and distraction conditions, Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) concluded that (the \emph{self-reported}) inner experience was unrelated to peripheral muscular activity as assessed using surface electromyography. We suggest this conclusion is hasty and based on waggly evidence. Indeed, concluding on the absence of an effect based on a low-powered statistical test is strongly problematic/uninformative. Moreover, the relation between self-reports and physiological measures was not \emph{directly} assessed, but only indirectly inferred from differences (or absence thereof) in group means. Given the ample inter-individual variability in these measures (as suggested through our reanalysis), we think inferring the individual-level relation between self-reports and physiolgogical measures from group means is inappropriate. Given these limitations, we conclude that it is unclear whether the target article adds to the current/extent knowledge and we suggest ways foward, both from a theoretical and from a methodological perspective. Complete source code, reproducible analyses, and figures are available at \url{https://github.com/lnalborczyk/inner_experience_EMG}.
 }
 
 \begin{document}
 \maketitle
 
-Wordcount (excluding abstract, references, tables, and figures): 184
+Wordcount (excluding abstract, references, tables, and figures): 465
 
 \newpage
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-\ldots{}
+The activity of silently talking to oneself or ``inner speech'' is a foundational ability\ldots{} despite its multiple adaptive functions in everyday life, inner speech can go awry and leads to sustained negative\ldots{} These inner speech ``dysfunctions''\ldots{}
 
-\hypertarget{some-thoughts-on-the-data}{%
-\section{Some thoughts on the data}\label{some-thoughts-on-the-data}}
+Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}), Lœvenbruck et al. (\protect\hyperlink{ref-loevenbruck_cognitive_2018}{2018}), Grandchamp et al. (\protect\hyperlink{ref-grandchamp_condialint_2019}{2019}), Alderson-Day and Fernyhough (\protect\hyperlink{ref-alderson-day_inner_2015}{2015}), Wilkinson and Fernyhough (\protect\hyperlink{ref-wilkinson_auditory_2017}{2017}), and Perrone-Bertolotti et al. (\protect\hyperlink{ref-perrone-bertolotti_what_2014}{2014}), Nalborczyk et al. (\protect\hyperlink{ref-nalborczyk_can_2020}{2020}), Nalborczyk et al. (\protect\hyperlink{ref-nalborczyk_introduction_2019}{2019}), Nalborczyk et al. (\protect\hyperlink{ref-nalborczyk_orofacial_2017}{2017}), Nalborczyk (\protect\hyperlink{ref-nalborczyk_understanding_2019}{2019})\ldots{}
+
+The main conclusion from Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) is that inner experience between induced rumination and distraction differs ``without a change in electromyographic correlates of inner speech''. In other words, their conclusion is that inner experience is unrelated (or loosely related) to the electromyographic correlates of inner speech, which are thought to be represented mostly by the EMG amplitude recorded over the OOI and OOS muscles. However, for this in-sample observation to be of interest in an out-of-sample context (i.e., to be informative of other non-observed individuals, or said otherwise, to brings information about the population), this absence of difference has to be based on\ldots{} Moreover, a simple visual exploration of the data reveals important variability between individuals in the main effect of interest. That is, some participants had higher perioral (OOS and OOI) muscular activity in the rumination condition than in the distraction condition, and some other participants showed the reverse pattern. This suggests unexplored variation in the determinants of this effects (e.g., the content of the inner experience). Indeed, the relation between the inner experience and the physiological correlates of inner speech production was only inferred from group means. However, given the previous point, this appears highly problematic. We explore each of these limitations and suggests ways forward in the following section.
+
+\hypertarget{exploring-the-data}{%
+\section{Exploring the data}\label{exploring-the-data}}
 
 \begin{figure}[!htb]
 
-{\centering \includegraphics[width=1\linewidth]{reanalysis_files/figure-latex/babar-1} 
+{\centering \includegraphics[width=1\linewidth]{reanalysis_files/figure-latex/general-1} 
 
 }
 
-\caption{General plot (N = 26)...}\label{fig:babar}
+\caption{Average log-EMG amplitude by muscle and condition. The black dots and intervals represent the by-group average and 95\% confidence interval (N = 26). The horizontal white line in the violin plot represents the median. The grey dots represent the individual-level average natural logarithm of the EMG amplitude by muscle and condition.}\label{fig:general}
 \end{figure}
 
 \ldots{}
@@ -172,18 +176,29 @@ Wordcount (excluding abstract, references, tables, and figures): 184
 
 \url{https://theethicalskeptic.com/2015/08/17/the-four-types-of-null-hypothesis-fallacy/}\ldots{}
 
-Unfortunately, the same line of reasoning applies for testing the effect of the order, which is even less powered than the test of the main effect of interest, rendering it practically uninformative\ldots{}
+\ldots{}
 
 \begin{quote}
 ``In order to test this, a Bayesian paired samples t-test was conducted for the peak log values of muscle activity between the rumination and distraction conditions. This revealed strong evidence in favour of the alternative hypothesis for the FRO muscle (B10 = 18.79), and moderate evidence in favour of the null hypothesis for the OOS (B10 = 0.232) and OOI (B10 = 0.278) muscles, according to current guidelines for interpreting Bayes factors {[}43{]}.''
 \end{quote}
+
+Unfortunately, the same line of reasoning applies for testing the effect of the order, which is even less powered than the test of the main effect of interest, rendering it practically uninformative\ldots{}
+
+\begin{figure}[!htb]
+
+{\centering \includegraphics[width=1\linewidth]{reanalysis_files/figure-latex/order-1} 
+
+}
+
+\caption{Average log-EMG amplitude by muscle and condition. The black dots and intervals represent the by-group average and 95\% confidence interval (N = 26). The horizontal white line in the violin plot represents the median. The grey dots represent the individual-level average natural logarithm of the EMG amplitude by muscle and condition.}\label{fig:order}
+\end{figure}
 
 \ldots{}
 
 \hypertarget{does-everyone}{%
 \subsection{Does everyone?}\label{does-everyone}}
 
-\ldots{}
+Haaf and Rouder (\protect\hyperlink{ref-haaf_developing_2017}{2017})\ldots{}
 
 \begin{figure}[!htb]
 
@@ -191,7 +206,7 @@ Unfortunately, the same line of reasoning applies for testing the effect of the 
 
 }
 
-\caption{General plot (mean and 95\% CI)... showing the inter-individual variability...}\label{fig:everyone}
+\caption{Inter-individual variability in the main effect of interest (i.e., the difference between the rumination and distraction conditions). Green dots and lines represent the average logarithm of the EMG amplitude of participants that showed a higher EMG amplitude in the rumination condition than in the distraction condition, whereas orange dots and lines represent the average logarithm of the EMG amplitude of participants that showed a higher EMG amplitude in the distraction condition than in the rumination condition.}\label{fig:everyone}
 \end{figure}
 
 Huge inter-individual variability\ldots{} which leads to the next point, what is the relation between self-reports and EMG?
@@ -223,20 +238,53 @@ Reproducible code and figures are available at \url{https://github.com/lnalborcz
 
 \hypertarget{refs}{}
 \begin{cslreferences}
+\leavevmode\hypertarget{ref-alderson-day_inner_2015}{}%
+Alderson-Day, B., \& Fernyhough, C. (2015). Inner speech: Development, cognitive functions, phenomenology, and neurobiology. \emph{Psychological Bulletin}, \emph{141}(5), 931--965. \url{https://doi.org/10.1037/bul0000021}
+
 \leavevmode\hypertarget{ref-R-papaja}{}%
 Aust, F., \& Barth, M. (2017). \emph{papaja: Create APA manuscripts with R Markdown}. \url{https://github.com/crsh/papaja}
+
+\leavevmode\hypertarget{ref-grandchamp_condialint_2019}{}%
+Grandchamp, R., Rapin, L., Perrone-Bertolotti, M., Pichat, C., Haldin, C., Cousin, E., Lachaux, J.-P., Dohen, M., Perrier, P., Garnier, M., Baciu, M., \& Lœvenbruck, H. (2019). The ConDialInt Model: Condensation, Dialogality, and Intentionality Dimensions of Inner Speech Within a Hierarchical Predictive Control Framework. \emph{Frontiers in Psychology}, \emph{10}. \url{https://doi.org/10.3389/fpsyg.2019.02019}
+
+\leavevmode\hypertarget{ref-haaf_developing_2017}{}%
+Haaf, J. M., \& Rouder, J. N. (2017). Developing constraint in Bayesian mixed models. \emph{Psychological Methods}, \emph{22}(4), 779--798. \url{https://doi.org/10.1037/met0000156}
+
+\leavevmode\hypertarget{ref-loevenbruck_cognitive_2018}{}%
+Lœvenbruck, H., Grandchamp, R., Rapin, L., Nalborczyk, L., Dohen, M., Perrier, P., Baciu, M., \& Perrone-Bertolotti, M. (2018). A cognitive neuroscience view of inner language: To predict and to hear, see, feel. In P. Langland-Hassan \& A. Vicente (Eds.), \emph{Inner speech: New voices} (p. 37). Oxford University Press.
 
 \leavevmode\hypertarget{ref-R-wordcountaddin}{}%
 Marwick, B. (2019). \emph{Wordcountaddin: Word counts and readability statistics in r markdown documents}.
 
+\leavevmode\hypertarget{ref-moffatt_inner_2020}{}%
+Moffatt, J., Mitrenga, K. J., Alderson-Day, B., Moseley, P., \& Fernyhough, C. (2020). Inner experience differs in rumination and distraction without a change in electromyographical correlates of inner speech. \emph{PLOS ONE}, \emph{15}(9), e0238920. \url{https://doi.org/10.1371/journal.pone.0238920}
+
 \leavevmode\hypertarget{ref-R-here}{}%
 Müller, K. (2017). \emph{Here: A simpler way to find your files}. \url{https://CRAN.R-project.org/package=here}
+
+\leavevmode\hypertarget{ref-nalborczyk_understanding_2019}{}%
+Nalborczyk, L. (2019). \emph{Understanding rumination as a form of inner speech: Probing the role of motor processes} {[}PhD Thesis{]}. Univ. Grenoble Alpes \& Ghent University.
+
+\leavevmode\hypertarget{ref-nalborczyk_introduction_2019}{}%
+Nalborczyk, L., Batailler, C., Lœvenbruck, H., Vilain, A., \& Bürkner, P.-C. (2019). An introduction to Bayesian multilevel models using brms: A case study of gender effects on vowel variability in standard indonesian. \emph{Journal of Speech Language and Hearing Research}, \emph{62}(5), 1225--1242. \url{https://doi.org/10.1044/2018_JSLHR-S-18-0006}
+
+\leavevmode\hypertarget{ref-nalborczyk_can_2020}{}%
+Nalborczyk, L., Grandchamp, R., Koster, E. H. W., Perrone-Bertolotti, M., \& Lœvenbruck, H. (2020). Can we decode phonetic features in inner speech using surface electromyography? \emph{PLOS ONE}, \emph{15}(5), e0233282. \url{https://doi.org/10.1371/journal.pone.0233282}
+
+\leavevmode\hypertarget{ref-nalborczyk_orofacial_2017}{}%
+Nalborczyk, L., Perrone-Bertolotti, M., Baeyens, C., Grandchamp, R., Polosan, M., Spinelli, E., Koster, E. H. W., \& Lœvenbruck, H. (2017). Orofacial electromyographic correlates of induced verbal rumination. \emph{Biological Psychology}, \emph{127}, 53--63. \url{https://doi.org/10.1016/j.biopsycho.2017.04.013}
+
+\leavevmode\hypertarget{ref-perrone-bertolotti_what_2014}{}%
+Perrone-Bertolotti, M., Rapin, L., Lachaux, J. P., Baciu, M., \& Lœvenbruck, H. (2014). What is that little voice inside my head? Inner speech phenomenology, its role in cognitive performance, and its relation to self-monitoring. \emph{Behavioural Brain Research}, \emph{261}, 220--239. \url{https://doi.org/10.1016/j.bbr.2013.12.034}
 
 \leavevmode\hypertarget{ref-R-base}{}%
 R Core Team. (2017). \emph{R: A language and environment for statistical computing}. R Foundation for Statistical Computing. \url{https://www.R-project.org/}
 
 \leavevmode\hypertarget{ref-R-tidyverse}{}%
 Wickham, H. (2017). \emph{Tidyverse: Easily install and load the 'tidyverse'}. \url{https://CRAN.R-project.org/package=tidyverse}
+
+\leavevmode\hypertarget{ref-wilkinson_auditory_2017}{}%
+Wilkinson, S., \& Fernyhough, C. (2017). Auditory verbal hallucinations and inner speech: A predictive processing perspective. In Z. Radman (Ed.), \emph{Before Consciousness: In Search of the Fundamentals of Mind}. Imprint Academic, Ltd.
 
 \leavevmode\hypertarget{ref-R-knitr}{}%
 Xie, Y. (2015). \emph{Dynamic documents with R and knitr} (2nd ed.). Chapman; Hall/CRC. \url{https://yihui.org/knitr/}
