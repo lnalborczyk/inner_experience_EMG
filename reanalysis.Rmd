@@ -52,14 +52,15 @@ library(glue)
 library(pwr)
 
 # setting seed for reproducibility
-set.seed(666)
+# set.seed(666)
 
 # setting up knitr options
 knitr::opts_chunk$set(
   cache = TRUE, eval = TRUE, echo = FALSE,
   warning = FALSE, message = FALSE,
   fig.align = "center", dev = "pdf",
-  out.width = "100%", fig.pos = "!htb"
+  out.width = "100%", fig.width = 8,
+  fig.pos = "!htb"
   )
 
 # counting words in the current .Rmd file
@@ -183,12 +184,45 @@ df2 %>%
     # facet_wrap(~order*muscle, ncol = 3) +
     facet_wrap(~muscle, ncol = 3) +
     labs(x = "Condition", y = "Natural logarithm of peak amplitude") +
-    theme_bw(base_size = 12) +
+    theme_bw(base_size = 10) +
     scale_colour_brewer(palette = "Dark2", direction = 1) +
     scale_fill_brewer(palette = "Dark2", direction = 1)
 ```
 
 ...
+
+```{r model, eval = FALSE, results = "hide"}
+# priors for the varying-effects model
+priors_varying <- c(
+    prior(normal(0, 10), class = Intercept, resp = "FRO"),
+    prior(normal(0, 1), class = b, resp = "FRO"),
+    prior(exponential(1), class = sigma, resp = "FRO"),
+    prior(exponential(1), class = sd, resp = "FRO"),
+    prior(normal(0, 10), class = Intercept, resp = "OOS"),
+    prior(normal(0, 1), class = b, resp = "OOS"),
+    prior(exponential(1), class = sigma, resp = "OOS"),
+    prior(exponential(1), class = sd, resp = "OOS"),
+    prior(normal(0, 10), class = Intercept, resp = "OOI"),
+    prior(normal(0, 1), class = b, resp = "OOI"),
+    prior(exponential(1), class = sigma, resp = "OOI"),
+    prior(exponential(1), class = sd, resp = "OOI")
+    )
+
+# fitting the model
+varying_effects <- brm(
+    mvbind(FRO, OOS, OOI) ~ 1 + condition + (1 | ID),
+    family = gaussian(),
+    prior = priors_varying,
+    data = df2,
+    chains = 4, cores = detectCores(),
+    warmup = 2000, iter = 10000,
+    control = list(adapt_delta = 0.95),
+    sample_prior = TRUE,
+    file = here("models/varying_effects")
+    )
+```
+
+Posterior distribution of the difference between the distraction and rumination conditions...
 
 ## Concluding on the null from low-powered studies
 
@@ -237,7 +271,7 @@ ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"]
 
 We fitted a multivariate Bayesian regression model on these data... then we generated new datasets from the posterior predictive distribution... and computed the Bayes factor in favour of the alternative hypothesis ($BF_{10}$) for varying sample sizes from 20 to 200 participants (by increments of 10 participants) with $10$ simulations (i.e., 1000 simulated datasets) for each sample size...
 
-```{r simulated-power, fig.width = 10, fig.cap = "Average natural logarithm of the Bayes factor in favour of the alternative hypothesis (BF10), along with its standard error, computed over 1000 datasets of increasing size simulated from the posterior predictive distribution of the varying-intercept multivariate Bayesian regresion model."}
+```{r simulated-power, fig.cap = "Average natural logarithm of the Bayes factor in favour of the alternative hypothesis (BF10), along with its standard error, computed over 1000 datasets of increasing size simulated from the posterior predictive distribution of the varying-intercept multivariate Bayesian regresion model."}
 # running the simulations
 # source("code/bf_simulation.R")
 
@@ -275,7 +309,7 @@ overall_results %>%
     geom_point(show.legend = FALSE) +
     facet_wrap(~bf_type, scales = "free") +
     scale_x_continuous(breaks = unique(sample_size) ) +
-    theme_bw(base_size = 12) +
+    theme_bw(base_size = 10) +
     labs(x = "Number of participants", y = "Natural logarithm of the Bayes factor") +
     scale_colour_brewer(palette = "Dark2", direction = 1) +
     scale_fill_brewer(palette = "Dark2", direction = 1)
@@ -334,7 +368,7 @@ df2 %>%
     # facetting by muscle
     facet_wrap(~muscle, ncol = 3) +
     labs(x = "Condition", y = "Natural logarithm of peak amplitude") +
-    theme_bw(base_size = 12) +
+    theme_bw(base_size = 10) +
     scale_colour_brewer(palette = "Dark2", direction = 1) +
     scale_fill_brewer(palette = "Dark2", direction = 1) +
     theme(
@@ -355,7 +389,7 @@ Unfortunately, the same line of reasoning applies for testing the effect of the 
 
 @haaf_developing_2017...
 
-```{r everyone, fig.cap = "Inter-individual variability in the main effect of interest (i.e., the difference between the rumination and distraction conditions). Green dots and lines represent the average logarithm of the EMG amplitude of participants that showed a higher EMG amplitude in the rumination condition than in the distraction condition, whereas orange dots and lines represent the average logarithm of the EMG amplitude of participants that showed a higher EMG amplitude in the distraction condition than in the rumination condition."}
+```{r everyone, fig.cap = "Inter-individual variability in the main effect of interest (i.e., the difference between the rumination and distraction conditions). Green dots and lines represent the average natural logarithm of the EMG amplitude of participants that showed a higher EMG amplitude in the rumination condition than in the distraction condition, whereas orange dots and lines represent the average natural logarithm of the EMG amplitude of participants that showed a higher EMG amplitude in the distraction condition than in the rumination condition."}
 # does everyone plot
 df2 %>%
     pivot_longer(cols = FRO:OOI, names_to = "muscle") %>%
@@ -376,37 +410,14 @@ df2 %>%
         show.legend = FALSE
         ) +
     # plotting individual data points
-    # geom_quasirandom(alpha = 0.3) +
     geom_point(size = 2, alpha = 0.8, show.legend = FALSE) +
+    # plotting individual trajectories
     geom_line(aes(group = ID), size = 0.5, alpha = 0.8, show.legend = FALSE) +
-    # plitting the by-group mean
-    # stat_summary(
-    #     fun.y = mean,
-    #     geom = "line", size = 2,
-    #     aes(group = interaction(muscle, ruminator) ),
-    #     position = pd,
-    #     show.legend = FALSE
-    #     ) +
-    # plotting means
-    # stat_summary(
-    #     fun.y = "mean",
-    #     geom = "point", shape = 16, size = 4,
-    #     position = pd,
-    #     show.legend = TRUE
-    #     ) +
-    # plotting confidence intervals
-    # stat_summary(
-    #     fun.data = mean_cl_normal,
-    #     geom = "errorbar", size = 2, width = 0,
-    #     fun.args = list(mult = 1.96),
-    #     show.legend = FALSE,
-    #     position = pd
-    #     ) +
     # facetting by muscle
     facet_wrap(~muscle) +
     # axis labels
     labs(x = "Condition", y = "Natural logarithm of peak amplitude") +
-    theme_bw(base_size = 12) +
+    theme_bw(base_size = 10) +
     scale_colour_brewer(palette = "Dark2", direction = -1) +
     scale_fill_brewer(palette = "Dark2", direction = -1)
 ```
