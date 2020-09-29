@@ -182,8 +182,8 @@ df2 %>%
         ) +
     # facet_wrap(~order*muscle, ncol = 3) +
     facet_wrap(~muscle, ncol = 3) +
-    labs(x = "Condition", y = "EMG log-amplitude") +
-    theme_bw(base_size = 10) +
+    labs(x = "Condition", y = "Natural logarithm of peak amplitude") +
+    theme_bw(base_size = 12) +
     scale_colour_brewer(palette = "Dark2", direction = 1) +
     scale_fill_brewer(palette = "Dark2", direction = 1)
 ```
@@ -305,27 +305,9 @@ df2 %>%
     mutate(order = factor(order, labels = c("RUM -> DIS", "DIS -> RUM")) ) %>%
     # plots the data
     ggplot(aes(x = condition, y = value, colour = order, fill = order) ) +
-    # violin plots
-    # geom_violin(
-    #     scale = "count",
-    #     fill = "black",
-    #     alpha = 0.15,
-    #     colour = "white",
-    #     position = pd,
-    #     # adjust = 0.8,
-    #     draw_quantiles = 0.5,
-    #     show.legend = FALSE
-    #     ) +
     # plotting individual data points
-    # geom_dotplot(
-    #     stackdir = "center",
-    #     binaxis = "y",
-    #     position = pd,
-    #     # binwidth = 1,
-    #     dotsize = 0.5,
-    #     alpha = 0.3
-    #     ) +
     geom_quasirandom(alpha = 0.3) +
+    # plotting means
     stat_summary(
         fun.y = mean,
         geom = "line", size = 1,
@@ -351,10 +333,16 @@ df2 %>%
         ) +
     # facetting by muscle
     facet_wrap(~muscle, ncol = 3) +
-    labs(x = "Condition", y = "EMG log-amplitude") +
-    theme_bw(base_size = 10) +
+    labs(x = "Condition", y = "Natural logarithm of peak amplitude") +
+    theme_bw(base_size = 12) +
     scale_colour_brewer(palette = "Dark2", direction = 1) +
-    scale_fill_brewer(palette = "Dark2", direction = 1)
+    scale_fill_brewer(palette = "Dark2", direction = 1) +
+    theme(
+      legend.title = element_blank(),
+      # legend.position = c(0.85, 0.85),
+      legend.position = "top",
+      legend.background = element_rect(size = 0.5, linetype = "solid", colour = "black")
+    )
 ```
 
 About the order effects, @moffatt_inner_2020 say:
@@ -417,7 +405,7 @@ df2 %>%
     # facetting by muscle
     facet_wrap(~muscle) +
     # axis labels
-    labs(x = "Condition", y = "EMG log-amplitude") +
+    labs(x = "Condition", y = "Natural logarithm of peak amplitude") +
     theme_bw(base_size = 12) +
     scale_colour_brewer(palette = "Dark2", direction = -1) +
     scale_fill_brewer(palette = "Dark2", direction = -1)
