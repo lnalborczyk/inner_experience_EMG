@@ -1,10 +1,10 @@
-################################################################
-# Reanalysing the data from Moffatt et al. (2020)
-# ----------------------------------------------------------
-# Ladislas Nalborczyk
-# Last updated on 23.09.2020
-# https://github.com/lnalborczyk/inner_experience_EMG
-#########################################################
+#######################################################
+# Reanalysing the data from Moffatt et al. (2020)     #
+# --------------------------------------------------- #
+# Ladislas Nalborczyk                                 #
+# Last updated on 28.09.2020                          #
+# https://github.com/lnalborczyk/inner_experience_EMG #
+#######################################################
 
 library(ggbeeswarm)
 library(tidyverse)
@@ -352,9 +352,9 @@ df2 %>%
     scale_colour_brewer(palette = "Dark2", direction = 1) +
     scale_fill_brewer(palette = "Dark2", direction = 1)
 
-#############################################
-# Bayesian multilevel models
-########################################
+##############################
+# Bayesian multilevel models #
+##############################
 
 # priors for the constant-effects model
 priors_constant <- c(
@@ -695,14 +695,14 @@ simulated_data_varying_effects <- update(
     # family = gaussian(),
     # prior = priors_varying,
     # prior = priors_simulated_data,
-    data = simulated_data_wide,
+    newdata = simulated_data_wide,
     chains = 4,
     cores = parallel::detectCores(),
     warmup = 2000, iter = 5000,
     control = list(adapt_delta = 0.99),
     sample_prior = TRUE,
     file = here("models/simulated_data_varying_effects")
-)
+    )
 
 # model summary
 summary(simulated_data_varying_effects)
@@ -741,23 +741,23 @@ plot(hyp_ooi, plot = FALSE, theme = theme_bw(base_size = 12) )[[1]] +
 post <- posterior_samples(simulated_data_varying_effects)
 
 plotPost(
-    post$b_FRO_conditionRUM - post$b_FRO_conditionDIS
-    # compVal = 0, ROPE = c(-0.1, 0.1)
+    post$b_FRO_conditionRUM - post$b_FRO_conditionDIS,
+    compVal = 0, ROPE = c(-0.1, 0.1)
     )
 
 plotPost(
     post$b_OOI_conditionRUM - post$b_OOI_conditionDIS,
-    # compVal = 0, ROPE = c(-0.1, 0.1)
+    compVal = 0, ROPE = c(-0.1, 0.1)
     )
 
 plotPost(
     post$b_OOS_conditionRUM - post$b_OOS_conditionDIS,
-    # compVal = 0, ROPE = c(-0.1, 0.1)
+    compVal = 0, ROPE = c(-0.1, 0.1)
     )
 
-###############################################################
-# Simulating effect of sample size on BF
-################################################
+##########################################
+# Simulating effect of sample size on BF #
+##########################################
 
 simulating_bfs <- function (n_obs) {
     
@@ -768,7 +768,10 @@ simulating_bfs <- function (n_obs) {
     n_ppts <- n_obs
     
     # what are the conditions?
-    nd <- distinct(df2, condition) %>% arrange(condition)
+    nd <- crossing(
+        distinct(df2, condition),
+        data.frame(ID = as.numeric(201:(201 + n_ppts - 1) ) )
+        )
     
     # simulating data
     bf_simulated_data <- posterior_predict(
@@ -778,22 +781,21 @@ simulating_bfs <- function (n_obs) {
         sample_new_levels = "gaussian",
         summary = FALSE,
         nsamples = 1
-        ) %>% 
-        data.frame() %>% 
-        mutate(iter = 1:n_ppts) %>% 
-        pivot_longer(-iter) %>%
-        separate(col = name, into = c("condition", "muscle"), sep = "\\.") %>%
-        mutate(condition = factor(condition, labels = nd$condition) ) %>%
+        )[1, , ] %>%
+        data.frame() %>%
+        bind_cols(nd) %>%
+        mutate(condition = factor(condition, labels = unique(nd$condition) ) ) %>%
+        pivot_longer(cols = FRO:OOI, names_to = "muscle") %>%
         mutate(muscle = factor(muscle) )
     
     # reshaping the simulated data
     bf_simulated_data_wide <- bf_simulated_data %>%
         pivot_wider(names_from = muscle, values_from = value) %>%
-        rename(ID = iter)
+        mutate(ID = as.numeric(ID), condition = as.character(condition) )
     
     # fitting the model
     bf_simulated_data_varying_effects <- update(
-        simulated_data_varying_effects,
+        varying_effects,
         newdata = bf_simulated_data_wide,
         # mvbind(FRO, OOS, OOI) ~ 1 + condition + (1 | ID),
         # family = gaussian(),
@@ -803,16 +805,35 @@ simulating_bfs <- function (n_obs) {
         warmup = 2000, iter = 5000,
         control = list(adapt_delta = 0.95),
         sample_prior = TRUE
-        # file = here("models/simulated_data_varying_effects")
         )
+    
+    bf_hyp_fro <- hypothesis(
+        bf_simulated_data_varying_effects,
+        "FRO_conditionRUM - FRO_conditionDIS = 0"
+        )
+    
+    bf_fro <- 1 / bf_hyp_fro$hypothesis$Evid.Ratio # %>% as.numeric
     
     bf_hyp_ooi <- hypothesis(
         bf_simulated_data_varying_effects,
         "OOI_conditionRUM - OOI_conditionDIS = 0"
         )
     
-    bf <- 1 / bf_hyp_ooi$hypothesis$Evid.Ratio # %>% as.numeric
-    results <- data.frame(n_obs = n_obs, bf = bf)
+    bf_ooi <- 1 / bf_hyp_ooi$hypothesis$Evid.Ratio # %>% as.numeric
+    
+    bf_hyp_oos <- hypothesis(
+        bf_simulated_data_varying_effects,
+        "OOS_conditionRUM - OOS_conditionDIS = 0"
+        )
+    
+    bf_oos <- 1 / bf_hyp_oos$hypothesis$Evid.Ratio # %>% as.numeric
+    
+    results <- data.frame(
+        n_obs = n_obs,
+        bf_fro = bf_fro,
+        bf_ooi = bf_ooi,
+        bf_oos = bf_oos
+        )
     
     return(results)
     
@@ -821,9 +842,13 @@ simulating_bfs <- function (n_obs) {
 # simulating for some range of sample sizes
 sample_size <- seq.int(from = 20, to = 200, by = 10)
 
-# looping ove these sample sizes
+# looping over these sample sizes
 for (i in 1:length(sample_size) ) {
     
+    # prints progression
+    print(paste("Sample size is", sample_size[i]) )
+    
+    # gets BFs for this sample size
     temp_results <- simulating_bfs(n_obs = sample_size[i])
     
     if (!exists("overall_results") ) {
@@ -840,20 +865,27 @@ for (i in 1:length(sample_size) ) {
     
 }
 
+# end of simulation
+format(Sys.time(), "%H:%M:%S")
+
 # saving the results
 save(overall_results, file = "results/overall_results.Rda")
 
 # plotting the results
 overall_results %>%
-    ggplot(aes(x = n_obs, y = bf) ) +
-    geom_line() +
+    na.omit() %>%
+    pivot_longer(cols = bf_fro:bf_oos, names_to = "bf_type") %>%
+    ggplot(aes(x = n_obs, y = value, colour = bf_type) ) +
+    # geom_hline(yintercept = 0, lty = 3) +
+    # geom_line() +
     geom_point() +
+    # facet_wrap(~bf_type) +
     theme_bw(base_size = 12) +
-    labs(x = "Number of participants", y = "Bayes factor")
+    labs(x = "Number of participants", y = "Log Bayes factor")
 
-###############################################################
-# Does everyone?
-################################################
+##################
+# Does everyone? #
+##################
 
 # does everyone plot
 df2 %>%
@@ -861,6 +893,7 @@ df2 %>%
     pivot_wider(names_from = condition, values_from = value) %>%
     mutate(ruminator = ifelse(RUM > DIS, 1, 0) ) %>%
     mutate(ruminator = as.factor(ruminator) ) %>%
+    # mutate(rum_dis_diff = RUM - DIS) %>%
     pivot_longer(cols = RUM:BAS, names_to = "condition") %>%
     ggplot(aes(x = condition, y = value, colour = ruminator, fill = ruminator) ) +
     # violin plots
