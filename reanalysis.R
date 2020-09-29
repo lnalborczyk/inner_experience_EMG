@@ -950,6 +950,12 @@ overall_results %>%
         title = "Mean +/- SE (computed over 100 simulations)"
         )
 
+# plotting the cauchy prior
+x <- seq(-5, 5, by = 0.01)
+plot(x = x, dcauchy(x, location = 0, scale = sqrt(2) / 2), col = "red", type = "l")
+lines(x = x, dcauchy(x, location = 0, scale = 1), col = "steelblue", type = "l")
+lines(x = x, dcauchy(x, location = 0, scale = sqrt(2)), col = "darkgreen", type = "l")
+
 ##################
 # Does everyone? #
 ##################
