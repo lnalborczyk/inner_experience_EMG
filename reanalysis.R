@@ -794,39 +794,57 @@ simulating_bfs <- function (n_obs) {
         mutate(ID = as.numeric(ID), condition = as.character(condition) )
     
     # fitting the model
-    bf_simulated_data_varying_effects <- update(
-        varying_effects,
-        newdata = bf_simulated_data_wide,
-        # mvbind(FRO, OOS, OOI) ~ 1 + condition + (1 | ID),
-        # family = gaussian(),
-        # prior = priors_varying,
-        # data = simulated_data_wide,
-        chains = 4, cores = detectCores(),
-        warmup = 2000, iter = 5000,
-        control = list(adapt_delta = 0.95),
-        sample_prior = TRUE
-        )
+    # bf_simulated_data_varying_effects <- update(
+    #     varying_effects,
+    #     newdata = bf_simulated_data_wide,
+    #     # mvbind(FRO, OOS, OOI) ~ 1 + condition + (1 | ID),
+    #     # family = gaussian(),
+    #     # prior = priors_varying,
+    #     # data = simulated_data_wide,
+    #     chains = 4, cores = detectCores(),
+    #     warmup = 2000, iter = 5000,
+    #     control = list(adapt_delta = 0.95),
+    #     sample_prior = TRUE
+    #     )
     
-    bf_hyp_fro <- hypothesis(
-        bf_simulated_data_varying_effects,
-        "FRO_conditionRUM - FRO_conditionDIS = 0"
-        )
+    # bf_hyp_fro <- hypothesis(
+    #     bf_simulated_data_varying_effects,
+    #     "FRO_conditionRUM - FRO_conditionDIS = 0"
+    #     )
+    # 
+    # bf_fro <- 1 / bf_hyp_fro$hypothesis$Evid.Ratio
+    # 
+    # bf_hyp_ooi <- hypothesis(
+    #     bf_simulated_data_varying_effects,
+    #     "OOI_conditionRUM - OOI_conditionDIS = 0"
+    #     )
+    # 
+    # bf_ooi <- 1 / bf_hyp_ooi$hypothesis$Evid.Ratio
+    # 
+    # bf_hyp_oos <- hypothesis(
+    #     bf_simulated_data_varying_effects,
+    #     "OOS_conditionRUM - OOS_conditionDIS = 0"
+    #     )
+    # 
+    # bf_oos <- 1 / bf_hyp_oos$hypothesis$Evid.Ratio
     
-    bf_fro <- 1 / bf_hyp_fro$hypothesis$Evid.Ratio
+    bf_fro <- ttestBF(
+        x = bf_simulated_data_wide$FRO[bf_simulated_data_wide$condition == "RUM"],
+        y = bf_simulated_data_wide$FRO[bf_simulated_data_wide$condition == "DIS"],
+        paired = TRUE, rscale = "medium"
+        ) %>% data.frame %>% pull(bf)
     
-    bf_hyp_ooi <- hypothesis(
-        bf_simulated_data_varying_effects,
-        "OOI_conditionRUM - OOI_conditionDIS = 0"
-        )
+    bf_ooi <- ttestBF(
+        x = bf_simulated_data_wide$OOI[bf_simulated_data_wide$condition == "RUM"],
+        y = bf_simulated_data_wide$OOI[bf_simulated_data_wide$condition == "DIS"],
+        paired = TRUE, rscale = "medium"
+        ) %>% data.frame %>% pull(bf)
     
-    bf_ooi <- 1 / bf_hyp_ooi$hypothesis$Evid.Ratio
-    
-    bf_hyp_oos <- hypothesis(
-        bf_simulated_data_varying_effects,
-        "OOS_conditionRUM - OOS_conditionDIS = 0"
-        )
-    
-    bf_oos <- 1 / bf_hyp_oos$hypothesis$Evid.Ratio
+    bf_oos <- ttestBF(
+        x = bf_simulated_data_wide$OOS[bf_simulated_data_wide$condition == "RUM"],
+        y = bf_simulated_data_wide$OOS[bf_simulated_data_wide$condition == "DIS"],
+        paired = TRUE, rscale = "medium"
+        ) %>% data.frame %>% pull(bf)
     
     # results <- data.frame(
     #     n_obs = n_obs,
@@ -839,9 +857,15 @@ simulating_bfs <- function (n_obs) {
     
     }
 
+# plotting the cauchy prior
+# x <- seq(-5, 5, by = 0.01)
+# plot(x = x, dcauchy(x, location = 0, scale = sqrt(2) / 2), col = "red", type = "l")
+# lines(x = x, dcauchy(x, location = 0, scale = 1), col = "steelblue", type = "l")
+# lines(x = x, dcauchy(x, location = 0, scale = sqrt(2)), col = "darkgreen", type = "l")
+
 # simulating for some range of sample sizes
-nsims <- 10
-sample_size <- seq.int(from = 20, to = 200, by = 20)
+nsims <- 1e3
+sample_size <- seq.int(from = 20, to = 200, by = 10)
 sample_size <- rep(sample_size, each = nsims)
 
 # initialising results
@@ -854,7 +878,7 @@ overall_results <- data.frame(
     )
 
 # looping over these sample sizes
-for (i in 1:nrow(empty_results) ) {
+for (i in 1:nrow(overall_results) ) {
     
     if (i == 1) {
         
@@ -864,12 +888,17 @@ for (i in 1:nrow(empty_results) ) {
     }
     
     # prints progression
-    print(paste("Current sample size is", sample_size[i]) )
+    print(
+        paste(
+            "Current sample size is", overall_results[i, ]$nobs,
+            "- Simulation number", overall_results[i, ]$nsim
+            )
+        )
     
     # gets BFs for this sample size and stores it in "overall_results"
     overall_results[i, 3:5] <- simulating_bfs(n_obs = overall_results[i, ]$nobs)
     
-    if (i == nrow(empty_results) ) {
+    if (i == nrow(overall_results) ) {
         
         # time of simulation end
         stop_time <- Sys.time()
@@ -885,25 +914,41 @@ for (i in 1:nrow(empty_results) ) {
 
 }
 
-# end of simulation
-# print(paste("End of simulation:", format(Sys.time(), "%H:%M:%S") ) )
-
 # saving the results
 save(overall_results, file = "results/overall_results.Rda")
 
 # plotting the results
 overall_results %>%
     na.omit() %>%
+    filter_all(any_vars(. != 0) ) %>%
     pivot_longer(cols = bf_fro:bf_oos, names_to = "bf_type") %>%
-    # mutate(value = log(value) ) %>%
+    mutate(value = log(value) ) %>%
+    mutate(bf_type = factor(bf_type, labels = c("FRO", "OOI", "OOS") ) ) %>%
     group_by(nobs, bf_type) %>%
-    summarise(across(.cols = value, .fns = list(mean = mean, se = ~sd(.x) / sqrt(nsims) ) ) ) %>%
-    ggplot(aes(x = nobs, y = value_mean, colour = bf_type) ) +
-    # geom_hline(yintercept = 0, lty = 3) +
-    geom_line() +
-    geom_point() +
+    summarise(
+        across(
+            .cols = value,
+            .fns = list(mean = mean, median = median, se = ~sd(.x) / sqrt(nsims), mad = mad)
+            )
+        ) %>%
+    ungroup() %>%
+    ggplot(aes(x = nobs, y = value_mean, colour = bf_type, fill = bf_type) ) +
+    geom_hline(yintercept = 0, lty = 3) +
+    geom_ribbon(
+        aes(x = nobs, ymin = value_mean - 1.96 * value_se, ymax = value_mean + 1.96 * value_se, colour = NULL),
+        # aes(x = nobs, ymin = value_median - value_mad, ymax = value_median + value_mad, colour = NULL),
+        alpha = 0.5, show.legend = FALSE
+        ) + 
+    geom_line(show.legend = FALSE) +
+    # geom_line(aes(y = value_median), show.legend = FALSE) +
+    geom_point(show.legend = FALSE) +
+    facet_wrap(~bf_type, scales = "free") +
+    scale_x_continuous(breaks = unique(sample_size) ) +
     theme_bw(base_size = 12) +
-    labs(x = "Number of participants", y = "Log Bayes factor")
+    labs(
+        x = "Number of participants", y = "Natural logarithm of the Bayes factor",
+        title = "Mean +/- SE (computed over 100 simulations)"
+        )
 
 ##################
 # Does everyone? #

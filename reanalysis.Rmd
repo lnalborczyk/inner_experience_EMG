@@ -1,5 +1,5 @@
 ---
-title: "Re-analysing the data from @moffatt_inner_2020: A textbook illustration of the fallacy of the null hypothesis"
+title: "Re-analysing the data from @moffatt_inner_2020: A textbook illustration of the absence of evidence fallacy"
 
 shorttitle: "The fallacy of the null"
 
@@ -50,6 +50,7 @@ library(knitr)
 library(BEST)
 library(here)
 library(glue)
+library(pwr)
 
 # setting seed for reproducibility
 set.seed(666)
@@ -74,11 +75,13 @@ Wordcount (excluding abstract, references, tables, and figures): `r wordcount`
 
 # Introduction
 
-The activity of silently talking to oneself or "inner speech" is a foundational ability... despite its multiple adaptive functions in everyday life, inner speech can go awry and leads to sustained negative... These inner speech "dysfunctions"...
+The activity of silently talking to oneself or "inner speech" is a foundational ability... despite its multiple adaptive functions in everyday life, inner speech can go awry and leads to sustained negative... These inner speech "dysfunctions" [for reviews, see @alderson-day_inner_2015; @perrone-bertolotti_what_2014; @loevenbruck_cognitive_2018]...
 
-@moffatt_inner_2020, @loevenbruck_cognitive_2018, @grandchamp_condialint_2019, @alderson-day_inner_2015, @wilkinson_auditory_2017, and @perrone-bertolotti_what_2014, @nalborczyk_can_2020, @nalborczyk_introduction_2019, @nalborczyk_orofacial_2017, @nalborczyk_understanding_2019...
+Given the predominantly verbal nature of rumination [], we previously proposed to study rumination as other forms of inner speech have been studied in the past, namely using surface electromyography and motor interference protocols [e.g., @nalborczyk_orofacial_2017; @nalborczyk_understanding_2019; @nalborczyk_can_2020;  @nalborczyk_articulatory_2020]...
 
-The main conclusion from @moffatt_inner_2020 is that inner experience between induced rumination and distraction differs "without a change in electromyographic correlates of inner speech". In other words, their conclusion is that inner experience is unrelated (or loosely related) to the electromyographic correlates of inner speech, which are thought to be represented mostly by the EMG amplitude recorded over the OOI and OOS muscles. However, for this in-sample observation to be of interest in an out-of-sample context (i.e., to be informative of other non-observed individuals, or said otherwise, to brings information about the population), this absence of difference has to be based on... Moreover, a simple visual exploration of the data reveals important variability between individuals in the main effect of interest. That is, some participants had higher perioral (OOS and OOI) muscular activity in the rumination condition than in the distraction condition, and some other participants showed the reverse pattern. This suggests unexplored variation in the determinants of this effects (e.g., the content of the inner experience). Indeed, the relation between the inner experience and the physiological correlates of inner speech production was only inferred from group means. However, given the previous point, this appears highly problematic. We explore each of these limitations and suggests ways forward in the following section.
+@moffatt_inner_2020, @grandchamp_condialint_2019,  @wilkinson_auditory_2017, @nalborczyk_introduction_2019...
+
+The main conclusion from @moffatt_inner_2020 is that inner experience between induced rumination and distraction differs "without a change in electromyographic correlates of inner speech". In other words, their conclusion is that inner experience is unrelated (or loosely related) to the electromyographic correlates of inner speech, which are thought to be represented mostly by the EMG amplitude recorded over the OOI and OOS muscles. However, for this in-sample observation to be of interest in an out-of-sample context (i.e., to be informative of other non-observed individuals, or said otherwise, to brings information about the population), this absence of difference has to be based on sufficiently powered sample size (given the target effect size) and on reliable measures... Moreover, a simple visual exploration of the data reveals important variability between individuals in the main effect of interest. That is, some participants had higher perioral (OOS and OOI) muscular activity in the rumination condition than in the distraction condition, and some other participants showed the reverse pattern. This suggests unexplored variation in the determinants of this effects (e.g., the content of the inner experience). Indeed, the relation between the inner experience and the physiological correlates of inner speech production was only inferred from group means. However, given the previous point, this appears highly problematic. We explore each of these limitations and suggests ways forward in the following section.
 
 # Exploring the data
 
@@ -190,18 +193,99 @@ df2 %>%
 
 ## Concluding on the null from low-powered studies
 
-https://theethicalskeptic.com/2015/08/17/the-four-types-of-null-hypothesis-fallacy/...
+There is an infamous tradition of running uninformative null-hypothesis significance tests in Psychology [e.g., @harlow_problem_1997; @meehl_appraising_1990-1; @meehl_theoretical_1978; @meehl_theory-testing_1967; @meehl_why_1990]. By "uninformative", we mean that some null-hypothesis significance tests are often *not* diagnostic with regards to the substantive question of interest...
 
-```{r}
-# importing data
-# df <- read_excel("data/RUM_master_data.xlsx")
+As highlighted by many authors [e.g.,@kline], concluding on an absence of difference based on not obtaining evidence for the difference is the continuous extension of the logical fallacy of the... The argument from ignorance, such as "Science has found no proof of intelligent life nearby us in space, therefore intelligent life does not exist nearby us in space."... the absence of evidence fallacy or fallacy of acceptance...
+
+This problem is tackled in modern usages of null-hypothesis significance test by ensuring that the test has good *severity* [e.g., @mayo_severe_2006; @mayo_statistical_2018]. In general terms, we have evidence for a claim to the extent that it survives a stringent scrutiny, that is if it survives *severe tests*. In other words, some claim (e.g., $\theta = 0$) is said to be *severely tested*) if it had great chances of being falsified, was the claim false. More formally, we can define $\text{SEV}(T, x0, H)$, the severity with which claim $H$ passes test $T$ with outcome $x0$, and $\text{SEV}(\mu > \mu_{1}) = \Pr(d(X) \leq d(x0); \mu = \mu_{1})$ [@mayo_severe_2006; @mayo_statistical_2018]...To put it simply... https://www.analytics-toolkit.com/glossary/severity/...
+
+Anticipating the critics on the power of their study (a critic that was probably raised during peer review), @moffatt_inner_2020 report the results of a (possibly ran a posteriori) power analysis using the effect size reported in @nalborczyk_orofacial_2017 of $d = 0.72$, which is highly optimistic estimate of the substantive effect of interest in the target article (i.e., the difference in EMG amplitude between the rumination and distraction conditions) as this effects represents the standardised mean difference *between a rest period and a rumination one* [@nalborczyk_orofacial_2017]...
+
+```{r power, echo = TRUE}
+# How many participants do we need for a target statistical power of 0.8?
+library(pwr)
+pwr.t.test(
+  d = 0.72, sig.level = 0.05, power = 0.8,
+  type = "one.sample", alternative = "two.sided"
+  )
 ```
 
-...
+We suggest the (a priori) power of the study ran by @moffatt_inner_2020 was was much lower than suggested by the authors. Indeed, we may speculate that the effect (i.e., the standardised mean difference in EMG amplitude) between the rumination and distraction condition may be much weaker than the effect (i.e., the standardised mean difference in EMG amplitude) between the rumination and the rest conditions. If we assume that the former is half the size of the latter [which seems reasonable given the distribution of effects sizes in Experimental Psychology, e.g., @szucs_empirical_2017], therefore the a priori power of the main statistical test from @moffatt_inner_2020 is around $0.44$, meaning that they had less than 1 chance over two to find a significant effect, given the effect in the population is actually $0.36$. Because this is less than the chance of obtaining a head in a coin flip, we feel these resources may have been better invested.
 
-> "In order to test this, a Bayesian paired samples t-test was conducted for the peak log values of muscle activity between the rumination and distraction conditions. This revealed strong evidence in favour of the alternative hypothesis for the FRO muscle (B10 = 18.79), and moderate evidence in favour of the null hypothesis for the OOS (B10 = 0.232) and OOI (B10 = 0.278) muscles, according to current guidelines for interpreting Bayes factors [43]."
+```{r actual_power, echo = TRUE}
+# A priori power for n = 26 (per condition) and d = 0.36
+pwr.t.test(
+  n = 26, d = 0.72 / 2, sig.level = 0.05,
+  type = "one.sample", alternative = "two.sided"
+  )
+```
 
-Unfortunately, the same line of reasoning applies for testing the effect of the order, which is even less powered than the test of the main effect of interest, rendering it practically uninformative...
+Anticipating again the legitimate critique that the absence of a significant difference is not *necessarily* "significant" evidence of the absence of the effect, @moffatt_inner_2020 report the following Bayes factor analysis:
+
+> "[...] therefore it is possible that the sample size of the present study lacked sufficient power to detect the effect of rumination on muscle activity. In order to test this, a Bayesian paired samples t-test was conducted for the peak log values of muscle activity between the rumination and distraction conditions. This revealed strong evidence in favour of the alternative hypothesis for the FRO muscle ($B_{10} = 18.79$), and moderate evidence in favour of the null hypothesis for the OOS ($B_{10} = 0.232$) and OOI ($B_{10} = 0.278$) muscles, according to current guidelines for interpreting Bayes factors [43]."
+
+While we appreciate the effort, the current approach poses new problems. First, contrary to what the authors suggest, computing a BF (i.e., comparing two models) does not solve at all the problem of low power. Second, no details are given with regards to the exact models that were compared. Second... Third, and most importantly, the BFs indicate moderate evidence in favour of the null for the OOI and OOS muscles. More precisely, these BFs indicated that the (observed) data are $1 / 0.232 \approx 4.31$ times more likely under the null than under the alternative hypothesis for the OOS and $1 / 0.278 \approx 3.6$ times more likely under the null than under the alternative hypothesis for the OOI. In other words, the evidence is favour of the null is relatively weak and sensitivity analyses (i.e., reporting the BF with different prior scales) may unsurprisingly results in various BFs... For instance... Finally and most importantly, the power...
+
+```{r sensitivity, echo = TRUE}
+library(BayesFactor)
+ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = "medium")
+ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = "wide")
+ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = "ultrawide")
+# ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = sqrt(2)/2)
+# ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = 1)
+# ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = sqrt(2) )
+```
+
+We fitted a multivariate Bayesian regression model on these data... then we generated new datasets from the posterior predictive distribution... and computed the Bayes factor in favour of the alternative hypothesis ($BF_{10}$) for varying sample sizes from 20 to 200 participants (by increments of 10 participants) with $10$ simulations (i.e., 1000 simulated datasets) for each sample size...
+
+```{r simulated-power, fig.width = 10, fig.cap = "Average natural logarithm of the Bayes factor in favour of the alternative hypothesis (BF10), along with its standard error, computed over 1000 datasets of increasing size simulated from the posterior predictive distribution of the varying-intercept multivariate Bayesian regresion model."}
+# loading the results
+load(file = "results/overall_results.Rda")
+
+# simulations parameters
+nsims <- 1e3
+sample_size <- seq.int(from = 20, to = 200, by = 20)
+
+# plotting the results
+overall_results %>%
+    na.omit() %>%
+    filter_all(any_vars(. != 0) ) %>%
+    pivot_longer(cols = bf_fro:bf_oos, names_to = "bf_type") %>%
+    mutate(value = log(value) ) %>%
+    mutate(bf_type = factor(bf_type, labels = c("FRO", "OOI", "OOS") ) ) %>%
+    group_by(nobs, bf_type) %>%
+    summarise(
+        across(
+            .cols = value,
+            .fns = list(mean = mean, median = median, se = ~sd(.x) / sqrt(nsims), mad = mad)
+            )
+        ) %>%
+    ungroup() %>%
+    ggplot(aes(x = nobs, y = value_mean, colour = bf_type, fill = bf_type) ) +
+    geom_hline(yintercept = 0, lty = 3) +
+    geom_ribbon(
+        aes(x = nobs, ymin = value_mean - 1.96 * value_se, ymax = value_mean + 1.96 * value_se, colour = NULL),
+        # aes(x = nobs, ymin = value_median - value_mad, ymax = value_median + value_mad, colour = NULL),
+        alpha = 0.5, show.legend = FALSE
+        ) + 
+    geom_line(show.legend = FALSE) +
+    # geom_line(aes(y = value_median), show.legend = FALSE) +
+    geom_point(show.legend = FALSE) +
+    facet_wrap(~bf_type, scales = "free") +
+    scale_x_continuous(breaks = unique(sample_size) ) +
+    theme_bw(base_size = 12) +
+    labs(x = "Number of participants", y = "Natural logarithm of the Bayes factor") +
+    scale_colour_brewer(palette = "Dark2", direction = 1) +
+    scale_fill_brewer(palette = "Dark2", direction = 1)
+```
+
+As shown in Figure \@ref(fig:simulated-power), the BF in favour of the alternative hypothesis is growing proportionally with the sample size...
+
+We should keep in mind the limitations of this analysis, which uses simulated datasets form the posterior distribution estimated from... which corresponds more or less to the Bayesian analogue of the post-hoc frequentist power analysis, which has been much criticised [e.g., @lakens_20_2014]. However, the present analysis differs from this kind of analysis by relying on the posterior distribution... and because we do not aim to reach a dichotomic (e.g., accept/reject) goal but rather to see how the BF amplitude evolves with varying sample sizes.
+
+## Manipulating rumination within-subject
+
+In @nalborczyk_dissociating_2020, we manipulated the modality of rumination (whether it is verbal or non-verbal) in a between-subject manner to avoid order effects... In contrast to this approach, @moffatt_inner_2020 asked participants to ruminate and then distract themselves (or reciprocally), after an induced stressor (an induced failure)...
 
 ```{r order, fig.cap = "Average log-EMG amplitude by muscle and condition. The black dots and intervals represent the by-group average and 95\\% confidence interval (N = 26). The horizontal white line in the violin plot represents the median. The grey dots represent the individual-level average natural logarithm of the EMG amplitude by muscle and condition."}
 # position for groups
@@ -271,7 +355,11 @@ df2 %>%
     scale_fill_brewer(palette = "Dark2", direction = 1)
 ```
 
-...
+...@moffatt_inner_2020 say:
+
+> "Unless otherwise reported, the inclusion of order in which the conditions were completed as a between-subjects variable as part of a mixed-design ANOVA produced no significant main effects or interac- tions involving order."
+
+Unfortunately, the same line of reasoning applies for testing the effect of the order, which is even less powered than the test of the main effect of interest, rendering it practically uninformative... @sassenhagen_common_2016...
 
 ## Does everyone?
 
