@@ -7,34 +7,7 @@
 # https://github.com/lnalborczyk/inner_experience_EMG  #
 ########################################################
 
-# imports data
-# df <- read_excel("data/RUM_master_data.xlsx")
-
-# reshapes data
-# df2 <- df %>%
-#     select(ID, order = Order, RUM_FRO_MAX_ln:BAS_OOI_MAX_ln) %>%
-#     na.omit %>%
-#     # reshapes wide to long format
-#     pivot_longer(
-#         cols = starts_with(c("RUM", "DIS", "BAS") ),
-#         names_to = "condition",
-#         values_to = "value",
-#         values_drop_na = TRUE
-#         ) %>%
-#     separate(
-#         col = condition,
-#         into = c("condition", "muscle"),
-#         sep = "_", extra = "merge"
-#         ) %>%
-#     # extracts muscle name
-#     mutate(muscle = substr(muscle, 1, 3) ) %>%
-#     # from long to wide
-#     pivot_wider(names_from = muscle, values_from = value)
-
-# imports model
-# varying_effects <- readRDS("models/varying_effects.rds")
-
-# function for simulating BFs
+# function for simulating BFs with varying sample size
 simulating_bfs <- function (n_obs) {
     
     # extracting posterior samples from varying-effects model
@@ -69,24 +42,28 @@ simulating_bfs <- function (n_obs) {
         pivot_wider(names_from = muscle, values_from = value) %>%
         mutate(ID = as.numeric(ID), condition = as.character(condition) )
     
+    # computing the BF10 for the FRO muscle
     bf_fro <- ttestBF(
         x = bf_simulated_data_wide$FRO[bf_simulated_data_wide$condition == "RUM"],
         y = bf_simulated_data_wide$FRO[bf_simulated_data_wide$condition == "DIS"],
         paired = TRUE, rscale = "medium"
         ) %>% data.frame %>% pull(bf)
     
+    # computing the BF10 for the OOI muscle
     bf_ooi <- ttestBF(
         x = bf_simulated_data_wide$OOI[bf_simulated_data_wide$condition == "RUM"],
         y = bf_simulated_data_wide$OOI[bf_simulated_data_wide$condition == "DIS"],
         paired = TRUE, rscale = "medium"
         ) %>% data.frame %>% pull(bf)
     
+    # computing the BF10 for the OOS muscle
     bf_oos <- ttestBF(
         x = bf_simulated_data_wide$OOS[bf_simulated_data_wide$condition == "RUM"],
         y = bf_simulated_data_wide$OOS[bf_simulated_data_wide$condition == "DIS"],
         paired = TRUE, rscale = "medium"
         ) %>% data.frame %>% pull(bf)
     
+    # returning the results
     return(c(bf_fro, bf_ooi, bf_oos) )
     
 }
@@ -98,7 +75,7 @@ nsims <- 1e3
 sample_size <- seq.int(from = 20, to = 200, by = 10)
 sample_size <- rep(sample_size, each = nsims)
 
-# initialising empty dataframe for storing results
+# initialising an empty dataframe to store the results
 overall_results <- data.frame(
     nobs = sample_size,
     nsim = rep(1:nsims, length(sample_size) / nsims),
@@ -112,7 +89,7 @@ for (i in 1:nrow(overall_results) ) {
     
     if (i == 1) {
         
-        # when did the simulation start
+        # when did the simulation start?
         start_time <- Sys.time()
         
     }
@@ -130,7 +107,7 @@ for (i in 1:nrow(overall_results) ) {
     
     if (i == nrow(overall_results) ) {
         
-        # when did the simulation end
+        # when did the simulation end?
         stop_time <- Sys.time()
         
         # prints start and end times
@@ -146,36 +123,3 @@ for (i in 1:nrow(overall_results) ) {
 
 # saving the results
 save(overall_results, file = "results/overall_results.Rda")
-
-# plotting the results
-# overall_results %>%
-#     na.omit() %>%
-#     filter_all(any_vars(. != 0) ) %>%
-#     pivot_longer(cols = bf_fro:bf_oos, names_to = "bf_type") %>%
-#     mutate(value = log(value) ) %>%
-#     mutate(bf_type = factor(bf_type, labels = c("FRO", "OOI", "OOS") ) ) %>%
-#     group_by(nobs, bf_type) %>%
-#     summarise(
-#         across(
-#             .cols = value,
-#             .fns = list(mean = mean, median = median, se = ~sd(.x) / sqrt(nsims), mad = mad)
-#             )
-#         ) %>%
-#     ungroup() %>%
-#     ggplot(aes(x = nobs, y = value_mean, colour = bf_type, fill = bf_type) ) +
-#     # ggplot(aes(x = nobs, y = value_median, colour = bf_type, fill = bf_type) ) +
-#     geom_hline(yintercept = 0, lty = 3) +
-#     geom_ribbon(
-#         aes(x = nobs, ymin = value_mean - 1.96 * value_se, ymax = value_mean + 1.96 * value_se, colour = NULL),
-#         # aes(x = nobs, ymin = value_median - value_mad, ymax = value_median + value_mad, colour = NULL),
-#         alpha = 0.5, show.legend = FALSE
-#         ) + 
-#     geom_line(show.legend = FALSE) +
-#     # geom_line(aes(y = value_median), show.legend = FALSE) +
-#     geom_point(show.legend = FALSE) +
-#     facet_wrap(~bf_type, scales = "free") +
-#     scale_x_continuous(breaks = unique(sample_size)[c(TRUE, FALSE)]) +
-#     theme_bw(base_size = 12) +
-#     labs(x = "Number of participants", y = "Natural logarithm of the Bayes factor") +
-#     scale_colour_brewer(palette = "Dark2", direction = 1) +
-#     scale_fill_brewer(palette = "Dark2", direction = 1)
