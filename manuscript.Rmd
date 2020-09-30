@@ -70,7 +70,7 @@ Wordcount (excluding abstract, references, tables, and figures): `r wordcount`
 
 The activity of silently talking to oneself or "inner speech" is a foundational ability... despite its multiple adaptive functions in everyday life, inner speech can go awry and leads to sustained negative... These inner speech "dysfunctions" [for reviews, see @alderson-day_inner_2015; @perrone-bertolotti_what_2014; @loevenbruck_cognitive_2018]...
 
-Given the predominantly verbal nature of rumination [], we previously proposed to study rumination as other forms of inner speech have been studied in the past, namely using surface electromyography and motor interference protocols [e.g., @nalborczyk_orofacial_2017; @nalborczyk_understanding_2019; @nalborczyk_can_2020;@nalborczyk_articulatory_2020]...
+Given the predominantly verbal nature of rumination [], we previously proposed to study rumination as other forms of inner speech have been studied in the past, namely using surface electromyography and motor interference protocols [e.g., @nalborczyk_orofacial_2017; @nalborczyk_understanding_2019; @nalborczyk_can_2020; @nalborczyk_articulatory_2020]...
 
 We have previously shown that... However, it was unclear... therefore, the extension of our study by @moffatt_inner_2020, which consisted by including a distraction control group, is more than welcome... However...
 
@@ -230,7 +230,7 @@ pwr.t.test(
   )
 ```
 
-We suggest the (a priori) power of the study ran by @moffatt_inner_2020 was was much lower than suggested by the authors. Indeed, we may speculate that the effect (i.e., the standardised mean difference in EMG amplitude) between the rumination and distraction condition may be much weaker than the effect (i.e., the standardised mean difference in EMG amplitude) between the rumination and the rest conditions. If we assume that the former is half the size of the latter [which seems reasonable given the distribution of effects sizes in Experimental Psychology, e.g., @szucs_empirical_2017], therefore the a priori power of the main statistical test from @moffatt_inner_2020 is around $0.44$, meaning that they had less than 1 chance over two to find a significant effect, given the effect in the population is actually $0.36$. Because this is less than the chance of obtaining a head in a coin flip, we feel these resources may have been better invested.
+We suggest the (a priori) power of the study ran by @moffatt_inner_2020 was much lower than suggested by the authors. Indeed, we may speculate that the effect (i.e., the standardised mean difference in EMG amplitude) between the rumination and distraction conditions may be much weaker than the effect (i.e., the standardised mean difference in EMG amplitude) between the rumination and the rest conditions. If we assume that the former is half the size of the latter [which seems reasonable given the high inter-individual variability in such effects, cf. the next section but also @nalborczyk_can_2020], therefore the a priori power of the main statistical test from @moffatt_inner_2020 was around $0.44$, meaning that they had less than 1 chance out of 2 to find a significant effect, given that the effect in the population was actually $0.36$. Because this is less than the chance of obtaining a head in a coin flip, we feel these resources may have been better invested.
 
 ```{r actual_power, echo = TRUE}
 # A priori power for n = 26 (per condition) and d = 0.36
@@ -240,13 +240,19 @@ pwr.t.test(
   )
 ```
 
-Anticipating again the legitimate critique that the absence of a significant difference is not *necessarily* "significant" evidence of the absence of the effect, @moffatt_inner_2020 report the following Bayes factor analysis:
+Anticipating the legitimate critique that the absence of a significant difference is not *necessarily* "significant" evidence for the absence of an effect, @moffatt_inner_2020 reported the following Bayes factor (BF) analysis:
 
 > "[...] therefore it is possible that the sample size of the present study lacked sufficient power to detect the effect of rumination on muscle activity. In order to test this, a Bayesian paired samples t-test was conducted for the peak log values of muscle activity between the rumination and distraction conditions. This revealed strong evidence in favour of the alternative hypothesis for the FRO muscle ($B_{10} = 18.79$), and moderate evidence in favour of the null hypothesis for the OOS ($B_{10} = 0.232$) and OOI ($B_{10} = 0.278$) muscles, according to current guidelines for interpreting Bayes factors [43]."
 
-While we appreciate the effort, the current approach poses new problems. First, contrary to what the authors suggest, computing a BF (i.e., comparing two models) does not solve at all the problem of low power. Second, no details are given with regards to the exact models that were compared. Second... Third, and most importantly, the BFs indicate moderate evidence in favour of the null for the OOI and OOS muscles. More precisely, these BFs indicated that the (observed) data are $1 / 0.232 \approx 4.31$ times more likely under the null than under the alternative hypothesis for the OOS and $1 / 0.278 \approx 3.6$ times more likely under the null than under the alternative hypothesis for the OOI. In other words, the evidence is favour of the null is relatively weak and sensitivity analyses (i.e., reporting the BF with different prior scales) may unsurprisingly results in various BFs... For instance... Finally and most importantly, the power...
+<!--
 
-```{r sensitivity, echo = TRUE}
+While we appreciate the effort, the current approach poses new problems. First, contrary to what the authors suggest, computing a BF (i.e., comparing two models) does not solve *at all* the problem of low power (we discuss this issue in more depth below). Second, few details are given with regards to the exact models that were compared. Third, and most importantly, the BFs indicate moderate evidence in favour of the null for the OOI and OOS muscles. More precisely, these BFs indicated that the (observed) data are $1 / 0.232 \approx 4.31$ times more likely under the null than under the alternative hypothesis for the OOS and $1 / 0.278 \approx 3.6$ times more likely under the null than under the alternative hypothesis for the OOI. In other words, the evidence is favour of the null is relatively weak and sensitivity analyses (i.e., reporting the BF with varying prior scales for the alternative hypothesis) may unsurprisingly results in various BFs. For instance... 
+
+-->
+
+While we appreciate the effort, the current approach poses new problems. First, contrary to what the authors suggest, computing a BF (i.e., comparing two models) does not solve *at all* the problem of low power...
+
+```{r sensitivity, echo = FALSE, eval = FALSE}
 library(BayesFactor)
 # rscale = sqrt(2) / 2
 ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = "medium")
@@ -256,9 +262,9 @@ ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"]
 ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = "ultrawide")
 ```
 
-We fitted a multivariate Bayesian regression model on these data using the `brms` package [@R-brms]... then we generated new datasets from the posterior predictive distribution... and computed the Bayes factor in favour of the alternative hypothesis ($BF_{10}$) for varying sample sizes from 20 to 200 participants (by increments of 10 participants) with $10$ simulations (i.e., 1000 simulated datasets) for each sample size... We then computed the BF using the `BayesFactor` package [@R-BayesFactor], using a "medium" prior on the scale of the Cauchy prior for the alternative hypothesis (i.e., a scale of 1).
+We first fitted a multivariate Bayesian regression model with varying-intercepts (by participant) and weakly informative priors on these data using the `brms` package [@R-brms]. From there, we i) generated new datasets from the posterior predictive distribution and ii) we computed the BF in favour of the alternative hypothesis ($\text{BF}_{10}$) using the `BayesFactor` package [@R-BayesFactor]. We used a "medium" prior (i.e., a scale of 1) on the scale of the Cauchy prior for the alternative hypothesis. We repeated this procedure for varying sample sizes from 20 to 200 participants (by increments of 10 participants) with $1000$ simulations (i.e., 1000 simulated datasets) for each sample size.
 
-```{r simulated-power, fig.cap = "Average natural logarithm of the Bayes factor in favour of the alternative hypothesis (BF10), along with its standard error, computed over 1000 datasets of increasing size simulated from the posterior predictive distribution of the varying-intercept multivariate Bayesian regresion model. A log-BF belows 0 represents evidence for the null hypothesis (relative to the alternative) and a log-BF above 0 represents evidence for the alternative hypothesis (relative to the null)."}
+```{r simulated-power, fig.cap = "Average natural logarithm of the Bayes factor in favour of the alternative hypothesis, along with its standard error, computed over 1000 datasets of increasing size simulated from the posterior predictive distribution of the varying-intercept multivariate Bayesian regresion model. A log-BF belows 0 represents evidence for the null hypothesis (relative to the alternative) and a log-BF above 0 represents evidence for the alternative hypothesis (relative to the null)."}
 # running the simulations
 # source("code/bf_simulation.R")
 
@@ -304,9 +310,9 @@ overall_results %>%
     scale_fill_brewer(palette = "Dark2", direction = 1)
 ```
 
-As shown in Figure \@ref(fig:simulated-power), the natural logarithm of the BF in favour of the alternative hypothesis is growing proportionally with the sample size. More precisely, whereas low sample sizes (i.e., below 80) support the null hypothesis, adequately-powered sample sizes support the alternative hypothesis for all three facial muscles. For instance, the average $BF_{10}$ computed for the OOI muscle with a sample size of 160 participants is of $\exp(2.18) \approx 8.85$, indicating that these data are approximately $8.85$ times more likely under the alternative hypothesis than under the null hypothesis. Alternatively, the BF can be interpreted as an updating factor, from prior odds to posterior odds.
+As shown in Figure \@ref(fig:simulated-power), the natural logarithm of the BF in favour of the alternative hypothesis is growing proportionally with the sample size. More precisely, whereas low sample sizes (i.e., below 80) support the null hypothesis, adequately-powered sample sizes support the alternative hypothesis for all three facial muscles for sample sizes larger than 80 participants. For instance, the average $\text{BF}_{10}$ computed for the OOI muscle with a sample size of 160 participants is of $\exp(2.18) \approx 8.85$, indicating that these data are approximately $8.85$ times more likely under the alternative hypothesis than under the null hypothesis.^[Alternatively, the BF can be interpreted as an updating factor, from prior odds to posterior odds.]
 
-We should keep in mind the limitations of this analysis, which uses simulated datasets form the posterior distribution estimated from... which corresponds more or less to the Bayesian analogue of the post-hoc frequentist power analysis, which has been much criticised [e.g., @lakens_20_2014]. However, the present analysis differs from this kind of analysis by relying on the posterior distribution... and because we do not aim to reach a dichotomic (e.g., accept/reject) goal but rather to see how the BF amplitude evolves with varying sample sizes.
+We should keep in mind some limitations of this analysis, which uses simulated datasets form the posterior predictive distribution estimated on the data collected by @moffatt_inner_2020. This analysis is the loose Bayesian analogue of the frequentist post-hoc power analysis, which has been much criticised [e.g., @lakens_20_2014]. Most importantly, an assumption of the present analysis is that the data from @moffatt_inner_2020 is our best source of information regarding the main effect of interest (in addition to the prior we specified earlier). However, the present analysis also differs from the frequentist post-hoc power analysis on several grounds. First, with the present analysis, we do not aim to assess the ability of our statistical test to pass some dichotomic threshold (e.g., accept/reject). Instead, we aim to assess how the $\text{BF}_{10}$ (i.e., the evidence for the alternative hypothesis, relative to the null hypothesis) behaves with varying sample sizes. Second, the present analysis relies on the posterior predictive distribution of the model fitted on the data from @moffatt_inner_2020, which naturally incorporates uncertainty about the effect of interest. By simulating datasets of varying sample sizes from the posterior predictive distribution (and by relying on a large number of simulations), uncertainty about the effect size is naturally incorporated into the simulation.
 
 ## Manipulating rumination within-subject
 
@@ -421,13 +427,11 @@ Huge inter-individual variability... which leads to the next point, what is the 
 
 # Discussion and conclusions
 
-Baseline-standardisation...
+...
 
 # Supplementary materials {#supp}
 
 Reproducible code and figures are available at https://github.com/lnalborczyk/inner_experience_EMG.
-
-Many packages have been used for the writing of this paper, among which the `ggplot2` package for plotting [@R-ggplot2] as well as the `glue` and `tidyverse` packages for code writing and formatting [@R-glue;@R-tidyverse]...
 
 # Acknowledgements {-}
 

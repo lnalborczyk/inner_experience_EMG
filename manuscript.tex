@@ -184,7 +184,7 @@ Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) reported the r
 \begin{document}
 \maketitle
 
-Wordcount (excluding abstract, references, tables, and figures): 1731
+Wordcount (excluding abstract, references, tables, and figures): 1727
 
 \newpage
 
@@ -215,8 +215,8 @@ The main conclusion from Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_20
 
 Posterior distribution of the difference between the distraction and rumination conditions\ldots{}
 
-\hypertarget{concluding-on-the-null-from-low-powered-studies}{%
-\subsection{Concluding on the null from low-powered studies}\label{concluding-on-the-null-from-low-powered-studies}}
+\hypertarget{concluding-on-the-null-from-low-powered-studies-is-uninformative}{%
+\subsection{Concluding on the null from low-powered studies is uninformative}\label{concluding-on-the-null-from-low-powered-studies-is-uninformative}}
 
 There is an infamous tradition of running uninformative null-hypothesis significance tests in Psychology (e.g., Meehl, \protect\hyperlink{ref-harlow_problem_1997}{1997}, \protect\hyperlink{ref-meehl_theoretical_1978}{1978}, \protect\hyperlink{ref-meehl_why_1990}{1990}\protect\hyperlink{ref-meehl_why_1990}{a}, \protect\hyperlink{ref-meehl_appraising_1990-1}{1990}\protect\hyperlink{ref-meehl_appraising_1990-1}{b}, \protect\hyperlink{ref-meehl_theory-testing_1967}{1967}). By ``uninformative'', we mean that some null-hypothesis significance tests are often \emph{not} diagnostic with regards to the substantive question of interest\ldots{}
 
@@ -248,7 +248,7 @@ Anticipating the critics on the power of their study (a critic that was probably
 ##     alternative = two.sided
 \end{verbatim}
 
-We suggest the (a priori) power of the study ran by Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) was was much lower than suggested by the authors. Indeed, we may speculate that the effect (i.e., the standardised mean difference in EMG amplitude) between the rumination and distraction condition may be much weaker than the effect (i.e., the standardised mean difference in EMG amplitude) between the rumination and the rest conditions. If we assume that the former is half the size of the latter (which seems reasonable given the distribution of effects sizes in Experimental Psychology, e.g., Szucs \& Ioannidis, \protect\hyperlink{ref-szucs_empirical_2017}{2017}), therefore the a priori power of the main statistical test from Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) is around \(0.44\), meaning that they had less than 1 chance over two to find a significant effect, given the effect in the population is actually \(0.36\). Because this is less than the chance of obtaining a head in a coin flip, we feel these resources may have been better invested.
+We suggest the (a priori) power of the study ran by Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) was much lower than suggested by the authors. Indeed, we may speculate that the effect (i.e., the standardised mean difference in EMG amplitude) between the rumination and distraction conditions may be much weaker than the effect (i.e., the standardised mean difference in EMG amplitude) between the rumination and the rest conditions. If we assume that the former is half the size of the latter (which seems reasonable given the high inter-individual variability in such effects, cf.~the next section but also Nalborczyk, Grandchamp, et al., \protect\hyperlink{ref-nalborczyk_can_2020}{2020}), therefore the a priori power of the main statistical test from Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) was around \(0.44\), meaning that they had less than 1 chance out of 2 to find a significant effect, given that the effect in the population was actually \(0.36\). Because this is less than the chance of obtaining a head in a coin flip, we feel these resources may have been better invested.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -271,70 +271,15 @@ We suggest the (a priori) power of the study ran by Moffatt et al. (\protect\hyp
 ##     alternative = two.sided
 \end{verbatim}
 
-Anticipating again the legitimate critique that the absence of a significant difference is not \emph{necessarily} ``significant'' evidence of the absence of the effect, Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) report the following Bayes factor analysis:
+Anticipating the legitimate critique that the absence of a significant difference is not \emph{necessarily} ``significant'' evidence for the absence of an effect, Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) reported the following Bayes factor (BF) analysis:
 
 \begin{quote}
 ``{[}\ldots{]} therefore it is possible that the sample size of the present study lacked sufficient power to detect the effect of rumination on muscle activity. In order to test this, a Bayesian paired samples t-test was conducted for the peak log values of muscle activity between the rumination and distraction conditions. This revealed strong evidence in favour of the alternative hypothesis for the FRO muscle (\(B_{10} = 18.79\)), and moderate evidence in favour of the null hypothesis for the OOS (\(B_{10} = 0.232\)) and OOI (\(B_{10} = 0.278\)) muscles, according to current guidelines for interpreting Bayes factors {[}43{]}.''
 \end{quote}
 
-While we appreciate the effort, the current approach poses new problems. First, contrary to what the authors suggest, computing a BF (i.e., comparing two models) does not solve at all the problem of low power. Second, no details are given with regards to the exact models that were compared. Second\ldots{} Third, and most importantly, the BFs indicate moderate evidence in favour of the null for the OOI and OOS muscles. More precisely, these BFs indicated that the (observed) data are \(1 / 0.232 \approx 4.31\) times more likely under the null than under the alternative hypothesis for the OOS and \(1 / 0.278 \approx 3.6\) times more likely under the null than under the alternative hypothesis for the OOI. In other words, the evidence is favour of the null is relatively weak and sensitivity analyses (i.e., reporting the BF with different prior scales) may unsurprisingly results in various BFs\ldots{} For instance\ldots{} Finally and most importantly, the power\ldots{}
+While we appreciate the effort, the current approach poses new problems. First, contrary to what the authors suggest, computing a BF (i.e., comparing two models) does not solve \emph{at all} the problem of low power\ldots{}
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\KeywordTok{library}\NormalTok{(BayesFactor)}
-\CommentTok{\# rscale = sqrt(2) / 2}
-\KeywordTok{ttestBF}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ df2}\OperatorTok{$}\NormalTok{OOI[df2}\OperatorTok{$}\NormalTok{condition }\OperatorTok{==}\StringTok{ "RUM"}\NormalTok{], }\DataTypeTok{y =}\NormalTok{ df2}\OperatorTok{$}\NormalTok{OOI[df2}\OperatorTok{$}\NormalTok{condition }\OperatorTok{==}\StringTok{ "DIS"}\NormalTok{], }\DataTypeTok{paired =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{rscale =} \StringTok{"medium"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## Bayes factor analysis
-## --------------
-## [1] Alt., r=0.707 : 0.2796158 ±0.03%
-## 
-## Against denominator:
-##   Null, mu = 0 
-## ---
-## Bayes factor type: BFoneSample, JZS
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# rscale = 1}
-\KeywordTok{ttestBF}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ df2}\OperatorTok{$}\NormalTok{OOI[df2}\OperatorTok{$}\NormalTok{condition }\OperatorTok{==}\StringTok{ "RUM"}\NormalTok{], }\DataTypeTok{y =}\NormalTok{ df2}\OperatorTok{$}\NormalTok{OOI[df2}\OperatorTok{$}\NormalTok{condition }\OperatorTok{==}\StringTok{ "DIS"}\NormalTok{], }\DataTypeTok{paired =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{rscale =} \StringTok{"wide"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## Bayes factor analysis
-## --------------
-## [1] Alt., r=1 : 0.2072665 ±0.06%
-## 
-## Against denominator:
-##   Null, mu = 0 
-## ---
-## Bayes factor type: BFoneSample, JZS
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# rscale = sqrt(2)}
-\KeywordTok{ttestBF}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ df2}\OperatorTok{$}\NormalTok{OOI[df2}\OperatorTok{$}\NormalTok{condition }\OperatorTok{==}\StringTok{ "RUM"}\NormalTok{], }\DataTypeTok{y =}\NormalTok{ df2}\OperatorTok{$}\NormalTok{OOI[df2}\OperatorTok{$}\NormalTok{condition }\OperatorTok{==}\StringTok{ "DIS"}\NormalTok{], }\DataTypeTok{paired =} \OtherTok{TRUE}\NormalTok{, }\DataTypeTok{rscale =} \StringTok{"ultrawide"}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## Bayes factor analysis
-## --------------
-## [1] Alt., r=1.414 : 0.1505836 ±0%
-## 
-## Against denominator:
-##   Null, mu = 0 
-## ---
-## Bayes factor type: BFoneSample, JZS
-\end{verbatim}
-
-We fitted a multivariate Bayesian regression model on these data using the \texttt{brms} package (Bürkner, \protect\hyperlink{ref-R-brms}{2017})\ldots{} then we generated new datasets from the posterior predictive distribution\ldots{} and computed the Bayes factor in favour of the alternative hypothesis (\(BF_{10}\)) for varying sample sizes from 20 to 200 participants (by increments of 10 participants) with \(10\) simulations (i.e., 1000 simulated datasets) for each sample size\ldots{} We then computed the BF using the \texttt{BayesFactor} package (Morey \& Rouder, \protect\hyperlink{ref-R-BayesFactor}{2018}), using a ``medium'' prior on the scale of the Cauchy prior for the alternative hypothesis (i.e., a scale of 1).
+We first fitted a multivariate Bayesian regression model with varying-intercepts (by participant) and weakly informative priors on these data using the \texttt{brms} package (Bürkner, \protect\hyperlink{ref-R-brms}{2017}). From there, we i) generated new datasets from the posterior predictive distribution and ii) we computed the BF in favour of the alternative hypothesis (\(\text{BF}_{10}\)) using the \texttt{BayesFactor} package (Morey \& Rouder, \protect\hyperlink{ref-R-BayesFactor}{2018}). We used a ``medium'' prior (i.e., a scale of 1) on the scale of the Cauchy prior for the alternative hypothesis. We repeated this procedure for varying sample sizes from 20 to 200 participants (by increments of 10 participants) with \(1000\) simulations (i.e., 1000 simulated datasets) for each sample size.
 
 \begin{figure}[!htb]
 
@@ -342,12 +287,12 @@ We fitted a multivariate Bayesian regression model on these data using the \text
 
 }
 
-\caption{Average natural logarithm of the Bayes factor in favour of the alternative hypothesis (BF10), along with its standard error, computed over 1000 datasets of increasing size simulated from the posterior predictive distribution of the varying-intercept multivariate Bayesian regresion model. A log-BF belows 0 represents evidence for the null hypothesis (relative to the alternative) and a log-BF above 0 represents evidence for the alternative hypothesis (relative to the null).}\label{fig:simulated-power}
+\caption{Average natural logarithm of the Bayes factor in favour of the alternative hypothesis, along with its standard error, computed over 1000 datasets of increasing size simulated from the posterior predictive distribution of the varying-intercept multivariate Bayesian regresion model. A log-BF belows 0 represents evidence for the null hypothesis (relative to the alternative) and a log-BF above 0 represents evidence for the alternative hypothesis (relative to the null).}\label{fig:simulated-power}
 \end{figure}
 
-As shown in Figure \ref{fig:simulated-power}, the natural logarithm of the BF in favour of the alternative hypothesis is growing proportionally with the sample size. More precisely, whereas low sample sizes (i.e., below 80) support the null hypothesis, adequately-powered sample sizes support the alternative hypothesis for all three facial muscles. For instance, the average \(BF_{10}\) computed for the OOI muscle with a sample size of 160 participants is of \(\exp(2.18) \approx 8.85\), indicating that these data are approximately \(8.85\) times more likely under the alternative hypothesis than under the null hypothesis. Alternatively, the BF can be interpreted as an updating factor, from prior odds to posterior odds.
+As shown in Figure \ref{fig:simulated-power}, the natural logarithm of the BF in favour of the alternative hypothesis is growing proportionally with the sample size. More precisely, whereas low sample sizes (i.e., below 80) support the null hypothesis, adequately-powered sample sizes support the alternative hypothesis for all three facial muscles for sample sizes larger than 80 participants. For instance, the average \(\text{BF}_{10}\) computed for the OOI muscle with a sample size of 160 participants is of \(\exp(2.18) \approx 8.85\), indicating that these data are approximately \(8.85\) times more likely under the alternative hypothesis than under the null hypothesis.\footnote{Alternatively, the BF can be interpreted as an updating factor, from prior odds to posterior odds.}
 
-We should keep in mind the limitations of this analysis, which uses simulated datasets form the posterior distribution estimated from\ldots{} which corresponds more or less to the Bayesian analogue of the post-hoc frequentist power analysis, which has been much criticised (e.g., Lakens, \protect\hyperlink{ref-lakens_20_2014}{2014}). However, the present analysis differs from this kind of analysis by relying on the posterior distribution\ldots{} and because we do not aim to reach a dichotomic (e.g., accept/reject) goal but rather to see how the BF amplitude evolves with varying sample sizes.
+We should keep in mind some limitations of this analysis, which uses simulated datasets form the posterior predictive distribution estimated on the data collected by Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}). This analysis is the loose Bayesian analogue of the frequentist post-hoc power analysis, which has been much criticised (e.g., Lakens, \protect\hyperlink{ref-lakens_20_2014}{2014}). Most importantly, an assumption of the present analysis is that the data from Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) is our best source of information regarding the main effect of interest (in addition to the prior we specified earlier). However, the present analysis also differs from the frequentist post-hoc power analysis on several grounds. First, with the present analysis, we do not aim to assess the ability of our statistical test to pass some dichotomic threshold (e.g., accept/reject). Instead, we aim to assess how the \(\text{BF}_{10}\) (i.e., the evidence for the alternative hypothesis, relative to the null hypothesis) behaves with varying sample sizes. Second, the present analysis relies on the posterior predictive distribution of the model fitted on the data from Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}), which naturally incorporates uncertainty about the effect of interest. By simulating datasets of varying sample sizes from the posterior predictive distribution (and by relying on a large number of simulations), uncertainty about the effect size is naturally incorporated into the simulation.
 
 \hypertarget{manipulating-rumination-within-subject}{%
 \subsection{Manipulating rumination within-subject}\label{manipulating-rumination-within-subject}}
@@ -395,14 +340,12 @@ Huge inter-individual variability\ldots{} which leads to the next point, what is
 \hypertarget{discussion-and-conclusions}{%
 \section{Discussion and conclusions}\label{discussion-and-conclusions}}
 
-Baseline-standardisation\ldots{}
+\ldots{}
 
 \hypertarget{supp}{%
 \section{Supplementary materials}\label{supp}}
 
 Reproducible code and figures are available at \url{https://github.com/lnalborczyk/inner_experience_EMG}.
-
-Many packages have been used for the writing of this paper, among which the \texttt{ggplot2} package for plotting (Wickham, \protect\hyperlink{ref-R-ggplot2}{2016}) as well as the \texttt{glue} and \texttt{tidyverse} packages for code writing and formatting (Hester, \protect\hyperlink{ref-R-glue}{2020}; Wickham, \protect\hyperlink{ref-R-tidyverse}{2017})\ldots{}
 
 \hypertarget{acknowledgements}{%
 \section*{Acknowledgements}\label{acknowledgements}}
@@ -427,9 +370,6 @@ Bürkner, P.-C. (2017). brms: An R package for bayesian multilevel models using 
 
 \leavevmode\hypertarget{ref-haaf_developing_2017}{}%
 Haaf, J. M., \& Rouder, J. N. (2017). Developing constraint in Bayesian mixed models. \emph{Psychological Methods}, \emph{22}(4), 779--798. \url{https://doi.org/10.1037/met0000156}
-
-\leavevmode\hypertarget{ref-R-glue}{}%
-Hester, J. (2020). \emph{Glue: Interpreted string literals}. \url{https://CRAN.R-project.org/package=glue}
 
 \leavevmode\hypertarget{ref-lakens_20_2014}{}%
 Lakens, D. (2014). The 20\% Statistician: Observed power, and what to do if your editor asks for post-hoc power analyses. In \emph{The 20\% Statistician}.
@@ -496,12 +436,6 @@ R Core Team. (2017). \emph{R: A language and environment for statistical computi
 
 \leavevmode\hypertarget{ref-rouder_is_2016}{}%
 Rouder, J. N., Morey, R. D., Verhagen, J., Province, J. M., \& Wagenmakers, E.-J. (2016). Is There a Free Lunch in Inference? \emph{Topics in Cognitive Science}, \emph{8}(3), 520--547. \url{https://doi.org/10.1111/tops.12214}
-
-\leavevmode\hypertarget{ref-szucs_empirical_2017}{}%
-Szucs, D., \& Ioannidis, J. P. A. (2017). Empirical assessment of published effect sizes and power in the recent cognitive neuroscience and psychology literature. \emph{PLOS Biology}, \emph{15}(3), e2000797. \url{https://doi.org/10.1371/journal.pbio.2000797}
-
-\leavevmode\hypertarget{ref-R-ggplot2}{}%
-Wickham, H. (2016). \emph{Ggplot2: Elegant graphics for data analysis}. Springer-Verlag New York. \url{http://ggplot2.org}
 
 \leavevmode\hypertarget{ref-R-tidyverse}{}%
 Wickham, H. (2017). \emph{Tidyverse: Easily install and load the 'tidyverse'}. \url{https://CRAN.R-project.org/package=tidyverse}
