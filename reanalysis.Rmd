@@ -12,7 +12,7 @@ affiliation:
   - id: 1
     institution: Univ. Grenoble Alpes, CNRS, Grenoble INP, GIPSA-lab, 38000 Grenoble, France
 
-abstract: "@moffatt_inner_2020 reported the results of an experiment (N = 26 in the final sample) comparing the facial (surface) electromyographic correlates of mental rumination and distraction, following an experimentally induced stressor. Based on the absence of significant difference in the perioral muscular activity between the rumination and distraction conditions, @moffatt_inner_2020 concluded that (the *self-reported*) inner experience was unrelated to peripheral muscular activity as assessed using surface electromyography. We suggest this conclusion is hasty and based on waggly evidence. Indeed, concluding on the absence of an effect based on a low-powered statistical test is strongly problematic/uninformative. Moreover, the relation between self-reports and physiological measures was not *directly* assessed, but only indirectly inferred from differences (or absence thereof) in group means. Given the ample inter-individual variability in these measures (as suggested through our reanalysis), we think inferring the individual-level relation between self-reports and physiological measures from group means is inappropriate. Given these limitations, we conclude that it is unclear whether the target article adds to the current/extent knowledge and we suggest ways forward, both from a theoretical and from a methodological perspective. Complete source code, reproducible analyses, and figures are available at https://github.com/lnalborczyk/inner_experience_EMG."
+abstract: "@moffatt_inner_2020 reported the results of an experiment (N = 26 in the final sample) comparing the facial (surface) electromyographic correlates of mental rumination and distraction, following an experimentally induced stressor. Based on the absence of significant difference in the perioral muscular activity between the rumination and distraction conditions, @moffatt_inner_2020 concluded that *self-reported* inner experience was unrelated to peripheral muscular activity as assessed using surface electromyography. We suggest this conclusion is hasty and based on waggly evidence. Indeed, concluding on the absence of an effect based on a low-powered non-significant p-value is strongly problematic/uninformative. Moreover, the relation between self-reports and physiological measures was not *directly* assessed, but only indirectly inferred from differences (or absence thereof) in group means. Given the ample inter-individual variability in these measures (as suggested by our reanalysis), we think inferring the individual-level relation between self-reports and physiological measures from group means is inappropriate. Given these limitations, we conclude that it is unclear whether the target article adds to the current/extent knowledge and we suggest ways forward, both from a theoretical and from a methodological perspective. Complete source code, reproducible analyses, and figures are available at https://github.com/lnalborczyk/inner_experience_EMG."
 
 keywords: NHST, Bayesian, fallacy, reanalysis, inner speech, rumination, electromyography
 
@@ -37,6 +37,7 @@ output:
 
 ```{r setup, include = FALSE, message = FALSE, warning = FALSE}
 library(wordcountaddin)
+library(BayesFactor)
 library(ggbeeswarm)
 library(rmarkdown)
 library(tidyverse)
@@ -77,11 +78,11 @@ Wordcount (excluding abstract, references, tables, and figures): `r wordcount`
 
 The activity of silently talking to oneself or "inner speech" is a foundational ability... despite its multiple adaptive functions in everyday life, inner speech can go awry and leads to sustained negative... These inner speech "dysfunctions" [for reviews, see @alderson-day_inner_2015; @perrone-bertolotti_what_2014; @loevenbruck_cognitive_2018]...
 
-Given the predominantly verbal nature of rumination [], we previously proposed to study rumination as other forms of inner speech have been studied in the past, namely using surface electromyography and motor interference protocols [e.g., @nalborczyk_orofacial_2017; @nalborczyk_understanding_2019; @nalborczyk_can_2020;  @nalborczyk_articulatory_2020]...
+Given the predominantly verbal nature of rumination [], we previously proposed to study rumination as other forms of inner speech have been studied in the past, namely using surface electromyography and motor interference protocols [e.g., @nalborczyk_orofacial_2017; @nalborczyk_understanding_2019; @nalborczyk_can_2020;@nalborczyk_articulatory_2020]...
 
-@moffatt_inner_2020, @grandchamp_condialint_2019,  @wilkinson_auditory_2017, @nalborczyk_introduction_2019...
+We have previously shown that... However, it was unclear... therefore, the extension of our study by @moffatt_inner_2020, which consisted by including a distraction control group, is more than welcome... However...
 
-The main conclusion from @moffatt_inner_2020 is that inner experience between induced rumination and distraction differs "without a change in electromyographic correlates of inner speech". In other words, their conclusion is that inner experience is unrelated (or loosely related) to the electromyographic correlates of inner speech, which are thought to be represented mostly by the EMG amplitude recorded over the OOI and OOS muscles. However, for this in-sample observation to be of interest in an out-of-sample context (i.e., to be informative of other non-observed individuals, or said otherwise, to brings information about the population), this absence of difference has to be based on sufficiently powered sample size (given the target effect size) and on reliable measures... Moreover, a simple visual exploration of the data reveals important variability between individuals in the main effect of interest. That is, some participants had higher perioral (OOS and OOI) muscular activity in the rumination condition than in the distraction condition, and some other participants showed the reverse pattern. This suggests unexplored variation in the determinants of this effects (e.g., the content of the inner experience). Indeed, the relation between the inner experience and the physiological correlates of inner speech production was only inferred from group means. However, given the previous point, this appears highly problematic. We explore each of these limitations and suggests ways forward in the following section.
+The main conclusion from @moffatt_inner_2020 is that inner experience between induced rumination and distraction differs "without a change in electromyographic correlates of inner speech". In other words, their conclusion is that inner experience is unrelated (or loosely related) to the electromyographic correlates of inner speech, which are thought to be represented mostly by the EMG amplitude recorded over the OOI and OOS muscles. However, for this in-sample observation to be of interest in an out-of-sample context (i.e., to be informative of other non-observed individuals, or said otherwise, to bring information about the population), this absence of difference has to be based on sufficiently powered sample size (given the target effect size) as well as on reliable measures. Moreover, a simple visual exploration of the data reveals important variability between individuals in the main effect of interest. That is, some participants had higher perioral (OOS and OOI) muscular activity in the rumination condition than in the distraction condition, and some other participants showed the reverse pattern. This suggests unexplored variation in the determinants of this effects (e.g., the content of the inner experience). Indeed, the relation between the inner experience and the physiological correlates of inner speech production was only inferred from group means. However, given the previous point, this appears highly problematic. We explore each of these limitations and suggests ways forward in the following section.
 
 # Exploring the data
 
@@ -149,15 +150,8 @@ df2 %>%
         show.legend = FALSE
         ) +
     # plotting individual data points
-    # geom_dotplot(
-    #     stackdir = "center",
-    #     binaxis = "y",
-    #     position = pd,
-    #     # binwidth = 1,
-    #     dotsize = 0.5,
-    #     alpha = 0.3
-    #     ) +
     geom_quasirandom(alpha = 0.3) +
+    # plotting means
     stat_summary(
         fun.y = mean,
         geom = "line", size = 1,
@@ -181,7 +175,7 @@ df2 %>%
         show.legend = FALSE,
         position = pd
         ) +
-    # facet_wrap(~order*muscle, ncol = 3) +
+    # facetting by muscle
     facet_wrap(~muscle, ncol = 3) +
     labs(x = "Condition", y = "Natural logarithm of peak amplitude") +
     theme_bw(base_size = 10) +
@@ -228,7 +222,7 @@ Posterior distribution of the difference between the distraction and rumination 
 
 There is an infamous tradition of running uninformative null-hypothesis significance tests in Psychology [e.g., @harlow_problem_1997; @meehl_appraising_1990-1; @meehl_theoretical_1978; @meehl_theory-testing_1967; @meehl_why_1990]. By "uninformative", we mean that some null-hypothesis significance tests are often *not* diagnostic with regards to the substantive question of interest...
 
-As highlighted by many authors [e.g.,@kline], concluding on an absence of difference based on not obtaining evidence for the difference is the continuous extension of the logical fallacy of the... The argument from ignorance, such as "Science has found no proof of intelligent life nearby us in space, therefore intelligent life does not exist nearby us in space."... the absence of evidence fallacy or fallacy of acceptance...
+As highlighted by many authors [e.g., @pollard_probability_1987; @rouder_is_2016], concluding on an absence of difference based on not obtaining evidence for the difference is the continuous extension of the logical fallacy of the... The argument from ignorance, such as "Science has found no proof of intelligent life nearby us in space, therefore intelligent life does not exist nearby us in space."... the absence of evidence fallacy or fallacy of acceptance...
 
 This problem is tackled in modern usages of null-hypothesis significance test by ensuring that the test has good *severity* [e.g., @mayo_severe_2006; @mayo_statistical_2018]. In general terms, we have evidence for a claim to the extent that it survives a stringent scrutiny, that is if it survives *severe tests*. In other words, some claim (e.g., $\theta = 0$) is said to be *severely tested*) if it had great chances of being falsified, was the claim false. More formally, we can define $\text{SEV}(T, x0, H)$, the severity with which claim $H$ passes test $T$ with outcome $x0$, and $\text{SEV}(\mu > \mu_{1}) = \Pr(d(X) \leq d(x0); \mu = \mu_{1})$ [@mayo_severe_2006; @mayo_statistical_2018]...To put it simply... https://www.analytics-toolkit.com/glossary/severity/...
 
@@ -261,17 +255,17 @@ While we appreciate the effort, the current approach poses new problems. First, 
 
 ```{r sensitivity, echo = TRUE}
 library(BayesFactor)
+# rscale = sqrt(2) / 2
 ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = "medium")
+# rscale = 1
 ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = "wide")
+# rscale = sqrt(2)
 ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = "ultrawide")
-# ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = sqrt(2)/2)
-# ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = 1)
-# ttestBF(x = df2$OOI[df2$condition == "RUM"], y = df2$OOI[df2$condition == "DIS"], paired = TRUE, rscale = sqrt(2) )
 ```
 
-We fitted a multivariate Bayesian regression model on these data... then we generated new datasets from the posterior predictive distribution... and computed the Bayes factor in favour of the alternative hypothesis ($BF_{10}$) for varying sample sizes from 20 to 200 participants (by increments of 10 participants) with $10$ simulations (i.e., 1000 simulated datasets) for each sample size...
+We fitted a multivariate Bayesian regression model on these data using the `brms` package [@R-brms]... then we generated new datasets from the posterior predictive distribution... and computed the Bayes factor in favour of the alternative hypothesis ($BF_{10}$) for varying sample sizes from 20 to 200 participants (by increments of 10 participants) with $10$ simulations (i.e., 1000 simulated datasets) for each sample size... We then computed the BF using the `BayesFactor` package [@R-BayesFactor], using a "medium" prior on the scale of the Cauchy prior for the alternative hypothesis (i.e., a scale of 1).
 
-```{r simulated-power, fig.cap = "Average natural logarithm of the Bayes factor in favour of the alternative hypothesis (BF10), along with its standard error, computed over 1000 datasets of increasing size simulated from the posterior predictive distribution of the varying-intercept multivariate Bayesian regresion model."}
+```{r simulated-power, fig.cap = "Average natural logarithm of the Bayes factor in favour of the alternative hypothesis (BF10), along with its standard error, computed over 1000 datasets of increasing size simulated from the posterior predictive distribution of the varying-intercept multivariate Bayesian regresion model. A log-BF belows 0 represents evidence for the null hypothesis (relative to the alternative) and a log-BF above 0 represents evidence for the alternative hypothesis (relative to the null)."}
 # running the simulations
 # source("code/bf_simulation.R")
 
@@ -280,7 +274,7 @@ load(file = "results/overall_results.Rda")
 
 # simulations parameters
 nsims <- 1e3
-sample_size <- seq.int(from = 20, to = 200, by = 20)
+sample_size <- seq.int(from = 20, to = 200, by = 10)
 
 # plotting the results
 overall_results %>%
@@ -293,29 +287,31 @@ overall_results %>%
     summarise(
         across(
             .cols = value,
-            .fns = list(mean = mean, median = median, se = ~sd(.x) / sqrt(nsims), mad = mad)
+            .fns = list(mean = mean, se = ~sd(.x) / sqrt(nsims) )
             )
         ) %>%
-    ungroup() %>%
+    ungroup() %>% 
     ggplot(aes(x = nobs, y = value_mean, colour = bf_type, fill = bf_type) ) +
     geom_hline(yintercept = 0, lty = 3) +
+    # geom_raster(fill = value_mean) +
     geom_ribbon(
-        aes(x = nobs, ymin = value_mean - 1.96 * value_se, ymax = value_mean + 1.96 * value_se, colour = NULL),
-        # aes(x = nobs, ymin = value_median - value_mad, ymax = value_median + value_mad, colour = NULL),
+        aes(
+          x = nobs, ymin = value_mean - 1.96 * value_se,
+          ymax = value_mean + 1.96 * value_se, colour = NULL
+          ),
         alpha = 0.5, show.legend = FALSE
         ) + 
     geom_line(show.legend = FALSE) +
-    # geom_line(aes(y = value_median), show.legend = FALSE) +
     geom_point(show.legend = FALSE) +
     facet_wrap(~bf_type, scales = "free") +
-    scale_x_continuous(breaks = unique(sample_size) ) +
+    scale_x_continuous(breaks = unique(sample_size)[c(TRUE, FALSE)]) +
     theme_bw(base_size = 10) +
     labs(x = "Number of participants", y = "Natural logarithm of the Bayes factor") +
     scale_colour_brewer(palette = "Dark2", direction = 1) +
     scale_fill_brewer(palette = "Dark2", direction = 1)
 ```
 
-As shown in Figure \@ref(fig:simulated-power), the BF in favour of the alternative hypothesis is growing proportionally with the sample size...
+As shown in Figure \@ref(fig:simulated-power), the natural logarithm of the BF in favour of the alternative hypothesis is growing proportionally with the sample size. More precisely, whereas low sample sizes (i.e., below 80) support the null hypothesis, adequately-powered sample sizes support the alternative hypothesis for all three facial muscles. For instance, the average $BF_{10}$ computed for the OOI muscle with a sample size of 160 participants is of $\exp(2.18) \approx 8.85$, indicating that these data are approximately $8.85$ times more likely under the alternative hypothesis than under the null hypothesis. Alternatively, the BF can be interpreted as an updating factor, from prior odds to posterior odds.
 
 We should keep in mind the limitations of this analysis, which uses simulated datasets form the posterior distribution estimated from... which corresponds more or less to the Bayesian analogue of the post-hoc frequentist power analysis, which has been much criticised [e.g., @lakens_20_2014]. However, the present analysis differs from this kind of analysis by relying on the posterior distribution... and because we do not aim to reach a dichotomic (e.g., accept/reject) goal but rather to see how the BF amplitude evolves with varying sample sizes.
 
@@ -396,8 +392,9 @@ df2 %>%
     pivot_wider(names_from = condition, values_from = value) %>%
     mutate(ruminator = ifelse(RUM > DIS, 1, 0) ) %>%
     mutate(ruminator = as.factor(ruminator) ) %>%
+    mutate(rum_dis = RUM - DIS) %>%
     pivot_longer(cols = RUM:BAS, names_to = "condition") %>%
-    ggplot(aes(x = condition, y = value, colour = ruminator, fill = ruminator) ) +
+    ggplot(aes(x = condition, y = value, colour = ruminator) ) +
     # violin plots
     geom_violin(
         scale = "count",
@@ -418,6 +415,7 @@ df2 %>%
     # axis labels
     labs(x = "Condition", y = "Natural logarithm of peak amplitude") +
     theme_bw(base_size = 10) +
+    # scale_color_gradient2(midpoint = 0, low = "red", mid = "green", high = "blue", space = "Lab")
     scale_colour_brewer(palette = "Dark2", direction = -1) +
     scale_fill_brewer(palette = "Dark2", direction = -1)
 ```
@@ -435,6 +433,8 @@ Baseline-standardisation...
 # Supplementary materials {#supp}
 
 Reproducible code and figures are available at https://github.com/lnalborczyk/inner_experience_EMG.
+
+Many packages have been used for the writing of this paper, among which the `ggplot2` package for plotting [@R-ggplot2] as well as the `glue` and `tidyverse` packages for code writing and formatting [@R-glue;@R-tidyverse]...
 
 # Acknowledgements {-}
 

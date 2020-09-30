@@ -7,36 +7,32 @@
 # https://github.com/lnalborczyk/inner_experience_EMG  #
 ########################################################
 
-library(BayesFactor)
-library(tidyverse)
-library(brms)
-
 # imports data
-df <- read_excel("data/RUM_master_data.xlsx")
+# df <- read_excel("data/RUM_master_data.xlsx")
 
 # reshapes data
-df2 <- df %>%
-    select(ID, order = Order, RUM_FRO_MAX_ln:BAS_OOI_MAX_ln) %>%
-    na.omit %>%
-    # reshapes wide to long format
-    pivot_longer(
-        cols = starts_with(c("RUM", "DIS", "BAS") ),
-        names_to = "condition",
-        values_to = "value",
-        values_drop_na = TRUE
-        ) %>%
-    separate(
-        col = condition,
-        into = c("condition", "muscle"),
-        sep = "_", extra = "merge"
-        ) %>%
-    # extracts muscle name
-    mutate(muscle = substr(muscle, 1, 3) ) %>%
-    # from long to wide
-    pivot_wider(names_from = muscle, values_from = value)
+# df2 <- df %>%
+#     select(ID, order = Order, RUM_FRO_MAX_ln:BAS_OOI_MAX_ln) %>%
+#     na.omit %>%
+#     # reshapes wide to long format
+#     pivot_longer(
+#         cols = starts_with(c("RUM", "DIS", "BAS") ),
+#         names_to = "condition",
+#         values_to = "value",
+#         values_drop_na = TRUE
+#         ) %>%
+#     separate(
+#         col = condition,
+#         into = c("condition", "muscle"),
+#         sep = "_", extra = "merge"
+#         ) %>%
+#     # extracts muscle name
+#     mutate(muscle = substr(muscle, 1, 3) ) %>%
+#     # from long to wide
+#     pivot_wider(names_from = muscle, values_from = value)
 
 # imports model
-varying_effects <- readRDS("models/varying_effects.rds")
+# varying_effects <- readRDS("models/varying_effects.rds")
 
 # function for simulating BFs
 simulating_bfs <- function (n_obs) {
@@ -58,7 +54,7 @@ simulating_bfs <- function (n_obs) {
         varying_effects,
         newdata = nd,
         allow_new_levels = TRUE,
-        sample_new_levels = "uncertainty", # "gaussian"
+        sample_new_levels = "gaussian",
         summary = FALSE,
         nsamples = 1
         )[1, , ] %>%
@@ -152,34 +148,34 @@ for (i in 1:nrow(overall_results) ) {
 save(overall_results, file = "results/overall_results.Rda")
 
 # plotting the results
-overall_results %>%
-    na.omit() %>%
-    filter_all(any_vars(. != 0) ) %>%
-    pivot_longer(cols = bf_fro:bf_oos, names_to = "bf_type") %>%
-    mutate(value = log(value) ) %>%
-    mutate(bf_type = factor(bf_type, labels = c("FRO", "OOI", "OOS") ) ) %>%
-    group_by(nobs, bf_type) %>%
-    summarise(
-        across(
-            .cols = value,
-            .fns = list(mean = mean, median = median, se = ~sd(.x) / sqrt(nsims), mad = mad)
-            )
-        ) %>%
-    ungroup() %>%
-    ggplot(aes(x = nobs, y = value_mean, colour = bf_type, fill = bf_type) ) +
-    # ggplot(aes(x = nobs, y = value_median, colour = bf_type, fill = bf_type) ) +
-    geom_hline(yintercept = 0, lty = 3) +
-    geom_ribbon(
-        aes(x = nobs, ymin = value_mean - 1.96 * value_se, ymax = value_mean + 1.96 * value_se, colour = NULL),
-        # aes(x = nobs, ymin = value_median - value_mad, ymax = value_median + value_mad, colour = NULL),
-        alpha = 0.5, show.legend = FALSE
-        ) + 
-    geom_line(show.legend = FALSE) +
-    geom_line(aes(y = value_median), show.legend = FALSE) +
-    geom_point(show.legend = FALSE) +
-    facet_wrap(~bf_type, scales = "free") +
-    scale_x_continuous(breaks = unique(sample_size) ) +
-    theme_bw(base_size = 12) +
-    labs(x = "Number of participants", y = "Natural logarithm of the Bayes factor") +
-    scale_colour_brewer(palette = "Dark2", direction = 1) +
-    scale_fill_brewer(palette = "Dark2", direction = 1)
+# overall_results %>%
+#     na.omit() %>%
+#     filter_all(any_vars(. != 0) ) %>%
+#     pivot_longer(cols = bf_fro:bf_oos, names_to = "bf_type") %>%
+#     mutate(value = log(value) ) %>%
+#     mutate(bf_type = factor(bf_type, labels = c("FRO", "OOI", "OOS") ) ) %>%
+#     group_by(nobs, bf_type) %>%
+#     summarise(
+#         across(
+#             .cols = value,
+#             .fns = list(mean = mean, median = median, se = ~sd(.x) / sqrt(nsims), mad = mad)
+#             )
+#         ) %>%
+#     ungroup() %>%
+#     ggplot(aes(x = nobs, y = value_mean, colour = bf_type, fill = bf_type) ) +
+#     # ggplot(aes(x = nobs, y = value_median, colour = bf_type, fill = bf_type) ) +
+#     geom_hline(yintercept = 0, lty = 3) +
+#     geom_ribbon(
+#         aes(x = nobs, ymin = value_mean - 1.96 * value_se, ymax = value_mean + 1.96 * value_se, colour = NULL),
+#         # aes(x = nobs, ymin = value_median - value_mad, ymax = value_median + value_mad, colour = NULL),
+#         alpha = 0.5, show.legend = FALSE
+#         ) + 
+#     geom_line(show.legend = FALSE) +
+#     # geom_line(aes(y = value_median), show.legend = FALSE) +
+#     geom_point(show.legend = FALSE) +
+#     facet_wrap(~bf_type, scales = "free") +
+#     scale_x_continuous(breaks = unique(sample_size)[c(TRUE, FALSE)]) +
+#     theme_bw(base_size = 12) +
+#     labs(x = "Number of participants", y = "Natural logarithm of the Bayes factor") +
+#     scale_colour_brewer(palette = "Dark2", direction = 1) +
+#     scale_fill_brewer(palette = "Dark2", direction = 1)
