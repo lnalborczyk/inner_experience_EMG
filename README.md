@@ -1,4 +1,4 @@
-# Re-analysing the data from @moffatt_inner_2020: A textbook illustration of the absence of evidence fallacy
+# Re-analysing the data from Moffatt et al. (2020): A textbook illustration of the absence of evidence fallacy
 
 ## Abstract
 
