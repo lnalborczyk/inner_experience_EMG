@@ -1,9 +1,10 @@
 ---
 title: |
-  | Re-analysing the data from @moffatt_inner_2020: A textbook illustration of the absence of evidence fallacy
+  | **Submitted to Meta-Psychology. Click here to follow the fully transparent editorial process of this submission. Participate in open peer review by commenting through hypothes.is directly on this preprint.**
   | 
-  | Submitted to Meta-Psychology. Click here to follow the fully transparent editorial process of this submission. Participate in open peer review by commenting through hypothes.is directly on this preprint.
-  
+  | 
+  | Re-analysing the data from @moffatt_inner_2020: A textbook illustration of the absence of evidence fallacy
+
 shorttitle: "The absence of evidence fallacy"
 
 author: 
