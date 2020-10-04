@@ -3,7 +3,7 @@
 # Simulating the effect of sample size on BFs          #
 # ---------------------------------------------------- #
 # Ladislas Nalborczyk                                  #
-# Last updated on 01.10.2020                           #
+# Last updated on 02.10.2020                           #
 # https://github.com/lnalborczyk/inner_experience_EMG  #
 ########################################################
 
