@@ -464,7 +464,13 @@ pwr.t.test(
   )
 ```
 
-We suggest the (a priori) power of the study ran by @moffatt_inner_2020 was much lower than suggested by the authors. Indeed, we speculate that the standardised mean difference in EMG peak amplitude between the rumination and distraction conditions may be much weaker than the standardised mean difference in EMG amplitude between the rumination and rest conditions. If we assume that the former is half the size of the latter [which seems reasonable given the high inter-individual variability in such effects, cf. the next section but also @nalborczyk_can_2020], therefore the a priori power of the main statistical test from @moffatt_inner_2020 was around $0.44$, meaning that they had less than 1 chance out of 2 to find a significant effect (given that the effect in the population was actually $0.36$). In other words, the chances of detecting the effect (was the effect actually non-null) were less than obtaining a head in a coin flip.
+We suggest the (a priori) power of the study ran by @moffatt_inner_2020 was much lower than suggested by the authors. Indeed, we speculate that the standardised mean difference in EMG peak amplitude between the rumination and distraction conditions may be much weaker than the standardised mean difference in EMG amplitude between the rumination and rest conditions. If we assume that the former is half the size of the latter [which seems reasonable given the high inter-individual variability in such effects, cf. the next section but also @nalborczyk_can_2020], therefore the a priori power of the main statistical test from @moffatt_inner_2020 was around $0.44$, meaning that they had less than 1 chance out of 2 to find a significant effect (given that the effect in the population was actually $0.36$).
+
+<!--
+
+In other words, the chances of detecting the effect (was the effect actually non-null) were less than obtaining a head in a coin flip.
+
+-->
 
 ```{r actual_power, echo = TRUE}
 # A priori power for n = 26 and d = 0.36
@@ -479,15 +485,87 @@ Once again, anticipating the legitimate critique that the absence of a significa
 
 > "[...] therefore it is possible that the sample size of the present study lacked sufficient power to detect the effect of rumination on muscle activity. In order to test this, a Bayesian paired samples t-test was conducted for the peak log values of muscle activity between the rumination and distraction conditions. This revealed strong evidence in favour of the alternative hypothesis for the FRO muscle ($B_{10} = 18.79$), and moderate evidence in favour of the null hypothesis for the OOS ($B_{10} = 0.232$) and OOI ($B_{10} = 0.278$) muscles, according to current guidelines for interpreting Bayes factors [43]."
 
-<!--
+While we appreciate the effort, the current approach poses new problems. First, contrary to what the authors suggest, whereas computing a BF indeed allows assessing the *relative evidence* for the null, computing a BF (i.e., comparing two models) does not solve at all the problem of low power. More precisely, the sensitivity (i.e., the ability to attain a certain goal) of an experimental design to detect a given effect is an issue for both frequentist and Bayesian statistical tests. To illustrate this point, we present below the results of two simulations.
 
-While we appreciate the effort, the current approach poses new problems. First, contrary to what the authors suggest, computing a BF (i.e., comparing two models) does not solve *at all* the problem of low power (we discuss this issue in more depth below). Second, few details are given with regards to the exact models that were compared. Third, and most importantly, the BFs indicate moderate evidence in favour of the null for the OOI and OOS muscles. More precisely, these BFs indicated that the (observed) data are $1 / 0.232 \approx 4.31$ times more likely under the null than under the alternative hypothesis for the OOS and $1 / 0.278 \approx 3.6$ times more likely under the null than under the alternative hypothesis for the OOI. In other words, the evidence is favour of the null is relatively weak and sensitivity analyses (i.e., reporting the BF with varying prior scales for the alternative hypothesis) may unsurprisingly results in various BFs. For instance... 
+```{r bf-dance, fig.cap = "Illustrating the distribution of Bayes factors (also known as the 'Dance of the Bayes factors') in favour of the alternative hypothesis for different effect sizes (N = 26). In the left panel, the effect size is fixed to d = 0 (i.e., the null hypothesis), in the middle panel, it is fixed to d = 0.36 (i.e., the supposed target effect size in Moffatt et al., 2020), and in the right panel, the effect size is fixed to d = 0.72 (i.e., the effect size reported in Nalborcayk et al., 2017)."}
+# https://julianquandt.com/post/power-analysis-by-data-simulation-in-r-part-ii/
+# http://daniellakens.blogspot.com/2016/07/dance-of-bayes-factors.html
+# population effect size
+cohensd <- 0.36
 
--->
+# sample size
+n <- 26
 
-While we appreciate the effort, the current approach poses new problems. First, contrary to what the authors suggest, whereas computing a BF indeed allows assessing the *relative evidence* for the null, computing a BF (i.e., comparing two models) does not solve at all the problem of low power. More precisely, the sensitivity (i.e., the ability to attain a certain goal) of an experimental design to detect a given effect is an issue for both frequentist and Bayesian statistical tests. To illustrate this, we present below the results of a simulation aiming to assess the relation between the sample size and the value of the BF.
+# number of simulated experiments
+nsims <- 1e3
 
-In the previous section, we fitted a multivariate Bayesian regression model with varying-intercepts by participant and weakly informative priors on the EMG data collected by @moffatt_inner_2020. Using this model, we i) generated new datasets from the posterior predictive distribution of this model and ii) we computed the BF in favour of the alternative hypothesis ($\text{BF}_{10}$) using the `BayesFactor` package [@R-BayesFactor]. We used a "medium" prior (i.e., a scale of 1) on the scale of the Cauchy prior for the alternative hypothesis. We repeated this procedure for varying sample sizes from 20 to 200 participants (by increments of 10 participants) with $1000$ simulations (i.e., 1000 simulated datasets) for each sample size.
+# initialises an empty array to store results
+results <- data.frame(
+  BF10 = numeric(nsims),
+  BF10_null = numeric(nsims),
+  BF10_double = numeric(nsims)
+  )
+
+for (i in 1:nsims) { # for each simulated experiment
+  
+  # produce N simulated participants
+  x <- rnorm(n = n, mean = 0, sd = 1)
+  
+  # produce N simulated participants
+  y <- rnorm(n = n, mean = 0 + cohensd, sd = 1)
+  
+  # produce N simulated participants
+  y_null <- rnorm(n = n, mean = 0, sd = 1)
+  
+  # produce N simulated participants
+  y_double <- rnorm(n = n, mean = 0 + cohensd * 2, sd = 1)
+  
+  results$BF10[i] <- ttestBF(
+    x = x, y = y, paired = TRUE, rscale = "medium"
+    ) %>%
+    data.frame %>%
+    pull(bf)
+  
+  results$BF10_null[i] <- ttestBF(
+    x = x, y = y_null, paired = TRUE, rscale = "medium"
+    ) %>%
+    data.frame %>%
+    pull(bf)
+  
+  results$BF10_double[i] <- ttestBF(
+    x = x, y = y_double, paired = TRUE, rscale = "medium"
+    ) %>%
+    data.frame %>%
+    pull(bf)
+  
+}
+
+results %>%
+  pivot_longer(cols = BF10:BF10_double, names_to = "type") %>%
+  mutate(
+    type = factor(
+      type,
+      levels = c("BF10_null", "BF10", "BF10_double"),
+      labels = c("Cohen's d = 0", "Cohen's d = 0.36", "Cohen's d = 0.72")
+      )
+    ) %>%
+  ggplot(aes(x = log(value), fill = type) ) +
+  geom_density(alpha = 0.5, show.legend = FALSE) +
+  geom_vline(xintercept = 0, linetype = 2) +
+  theme_bw(base_size = 12) +
+  facet_wrap(~ type, scales = "free_x") +
+  labs(x = "Natural logarithm of the BF10", y = "Density") +
+  scale_colour_brewer(palette = "Dark2", direction = 1) +
+  scale_fill_brewer(palette = "Dark2", direction = 1)
+
+prop_d0 <- mean(results$BF10_null > 1)
+prop_d0.36 <- mean(results$BF10 > 1)
+prop_d0.72 <- mean(results$BF10_double > 1)
+```
+
+First, we simulated 10.000 datasets (for N = 26) under the assumption of either no effect (i.e., the null hypothesis), an effect size of d = 0.36 [i.e., the supposed target effect size in @moffatt_inner_2020], or an effect size of d = 0.72 [i.e., the effect size reported in @nalborczyk_orofacial_2017]. As shown in Figure \@ref(fig:bf-dance), the distribution of BFs computed under each hypothesis reveals important inter-simulation variability. For instance, under the null hypothesis (i.e., when the "true" effect size is d = 0), `r round(prop_d0 * 100, 2)`% of the computed BFs are above 0 and hence support the alternative hypothesis. When the "true" effect size is of d = 0.36, `r round(100 - prop_d0.36 * 100, 2)`% of the BFs are below 0 and hence support the null hypothesis (although the true effect size is actually non-null). When the "true" effect size is of d = 0.72, `r round(100 - prop_d0.72 * 100, 2)`% of the BFs are still below 0. In other words, for small sample and effect sizes, BFs have high error rates.
+
+Second, we conducted another simulation with the aim of assessing the relation between the sample size and the value of the BF. In the previous section, we fitted a multivariate Bayesian regression model with varying-intercepts by participant and weakly informative priors on the EMG data collected by @moffatt_inner_2020. Using this model, we i) generated new datasets from the posterior predictive distribution of this model and ii) we computed the BF in favour of the alternative hypothesis ($\text{BF}_{10}$) using the `BayesFactor` package [@R-BayesFactor]. We used a "medium" prior (i.e., a scale of 1) on the scale of the Cauchy prior for the alternative hypothesis. We repeated this procedure for varying sample sizes from 20 to 200 participants (by increments of 10 participants) with $1000$ simulations (i.e., 1000 simulated datasets) for each sample size.
 
 ```{r simulated-power, fig.cap = "Average natural logarithm of the Bayes factor in favour of the alternative hypothesis, along with its standard error, computed over 1000 datasets of increasing size simulated from the posterior predictive distribution of the varying-intercept multivariate Bayesian regresion model, fitted on the data from Moffatt et al. (2020). A log-BF belows 0 represents evidence for the null hypothesis (relative to the alternative hypothesis) and a log-BF above 0 represents evidence for the alternative hypothesis (relative to the null hypothesis)."}
 # running the simulations
