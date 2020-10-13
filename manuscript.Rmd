@@ -668,11 +668,9 @@ It should be noted that the question of the qualitative differences in the EMG c
 
 <!--
 
-Which leads to the next point, what is the relation between self-reports and EMG?
-
 ## Relating the subjective inner experience to the psychophysiological correlates
 
-From page 10: "Independent t-tests revealed that inner speech in the rumination condition was rated as more Condensed if it was engaged in first, compared to if it was completed second (t(29) = 3.237, p = 0.003, d = 1.163). The rumination condition was rated as involving more Positive inner speech by those who engaged in rumination first, compared to those who completed rumina- tion second (t(29) = 2.513, p = 0.018, d = 0.903). In summary, rumination tended to involve more Condensed and Positive inner speech if engaged in first"...
+"Independent t-tests revealed that inner speech in the rumination condition was rated as more Condensed if it was engaged in first, compared to if it was completed second (t(29) = 3.237, p = 0.003, d = 1.163). The rumination condition was rated as involving more Positive inner speech by those who engaged in rumination first, compared to those who completed rumina- tion second (t(29) = 2.513, p = 0.018, d = 0.903). In summary, rumination tended to involve more Condensed and Positive inner speech if engaged in first".
 
 ```{r reports, eval = FALSE}
 # reshaping from wide to long
