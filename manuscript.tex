@@ -37,51 +37,13 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
 \hypersetup{
+  pdftitle={Re-analysing the data from Moffatt et al. (2020): A textbook illustration of the absence of evidence fallacy},
+  pdfauthor={Ladislas Nalborczyk1},
   pdflang={en-EN},
   pdfkeywords={NHST, Bayesian, logical fallacy, reanalysis, inner speech, rumination, electromyography},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
-\usepackage{color}
-\usepackage{fancyvrb}
-\newcommand{\VerbBar}{|}
-\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
-% Add ',fontsize=\small' for more characters per line
-\usepackage{framed}
-\definecolor{shadecolor}{RGB}{248,248,248}
-\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
-\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
-\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
-\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\BuiltInTok}[1]{#1}
-\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
-\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
-\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
-\newcommand{\ExtensionTok}[1]{#1}
-\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
-\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\ImportTok}[1]{#1}
-\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
-\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
-\newcommand{\NormalTok}[1]{#1}
-\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
-\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
-\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
-\newcommand{\RegionMarkerTok}[1]{#1}
-\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
-\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
-\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 \usepackage{graphicx}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -144,15 +106,12 @@
   {\section{\normalfont\normalsize\abstractname}}
   {\section*{\normalfont\normalsize\abstractname}}
   {}{\typeout{Failed to patch abstract.}}
+\patchcmd{\HyOrg@maketitle}
+  {\section{\protect\normalfont{\@title}}}
+  {\section*{\protect\normalfont{\@title}}}
+  {}{\typeout{Failed to patch title.}}
 \makeatother
 \shorttitle{The absence of evidence fallacy}
-\author{Ladislas Nalborczyk\textsuperscript{1}}
-\affiliation{
-\vspace{0.5cm}
-\textsuperscript{1} Univ. Grenoble Alpes, CNRS, Grenoble INP, GIPSA-lab, 38000 Grenoble, France}
-\authornote{
-
-Correspondence concerning this article should be addressed to Ladislas Nalborczyk, GIPSA-lab, CNRS, Univ. Grenoble Alpes, 11 Rue des Mathématiques, 38400 Saint-Martin-d'Hères, France. E-mail: ladislas.nalborczyk@gipsa-lab.fr}
 \keywords{NHST, Bayesian, logical fallacy, reanalysis, inner speech, rumination, electromyography}
 \usepackage{lineno}
 
@@ -172,21 +131,23 @@ Correspondence concerning this article should be addressed to Ladislas Nalborczy
   \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces}%
   {\par}
 
-\title{\textbf{Submitted to Meta-Psychology. Click here to follow the fully transparent editorial process of this submission. Participate in open peer review by commenting through hypothes.is directly on this preprint.}\\
-~\\
-~\\
-Re-analysing the data from Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}): A textbook illustration of the absence of evidence fallacy}
-
+\title{Re-analysing the data from Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}): A textbook illustration of the absence of evidence fallacy}
+\author{Ladislas Nalborczyk\textsuperscript{1}}
 \date{}
+
+
+\affiliation{\vspace{0.5cm}\textsuperscript{1} Univ. Grenoble Alpes, CNRS, Grenoble INP, GIPSA-lab, 38000 Grenoble, France}
 
 \abstract{
 Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) reported the results of an experiment (N = 26 in the final sample) comparing the facial electromyographic correlates of mental rumination and distraction, following an experimentally induced stressor. Based on the absence of significant difference in the perioral muscular activity between the rumination and distraction conditions, Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) concluded that \emph{self-reported} inner experience was unrelated to peripheral muscular activity as assessed using surface electromyography. We suggest this conclusion is at best hasty. Indeed, concluding on the absence of an effect based on an under-powered non-significant \emph{p}-value is strongly uninformative. Moreover, the relation between self-reports and physiological measures was not directly assessed, but only indirectly inferred from differences (or absence thereof) in group averages. Given the ample inter-individual variability in these measures (as suggested by our reanalysis), we think inferring the individual-level relation between self-reports and physiological measures from group averages is inappropriate. Given these limitations, we conclude that there is limited evidence for the main conclusion put forward by Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) and we suggest ways forward, both from a theoretical and from a methodological perspective. Complete source code, reproducible analyses, and figures are available at \url{https://osf.io/ba3gk/}.
 }
 
+
+
 \begin{document}
 \maketitle
 
-Wordcount (excluding abstract, references, tables, and figures): 4579
+Wordcount (excluding abstract, references, tables, and figures): 4182
 
 \newpage
 
@@ -215,7 +176,7 @@ Their final sample of participants, after data exclusion, included 26 participan
 \caption{Average natural logarithm of the EMG peak amplitude per muscle and condition. The black dots and intervals represent the by-group average and 95\% confidence interval (N = 26). The horizontal white line in the violin plot represents the median. The grey dots represent the individual-level average natural logarithm of the EMG amplitude by muscle and condition.}\label{fig:general}
 \end{figure}
 
-To model EMG peak amplitude variations in response to the rumination and distraction inductions, we fitted a Bayesian multivariate regression model with the natural logarithm of the EMG peak amplitude as an outcome and \emph{Condition} (baseline, rumination, distraction) as a categorical predictor. Therefore, the intercept represents the estimated natural logarithm of the EMG peak amplitude in the baseline condition, and the slopes for the rumination and distraction conditions represent deviations from the baseline. These analyses were conducted using the \texttt{brms} package (Bürkner, \protect\hyperlink{ref-R-brms}{2017}), an \texttt{R} implementation of Bayesian multilevel models that employs the probabilistic programming language \texttt{Stan} (Carpenter et al., \protect\hyperlink{ref-carpenter_stan_2017}{2017}). We ran four chains including each 10.000 iterations and a warmup of 2.000 iterations. Posterior convergence was assessed examining autocorrelation and trace plots, as well as the Gelman-Rubin statistic. Constant effects estimates were summarised via their posterior mean and 95\% credible interval. We also report Bayes factors (BFs) computed using the Savage-Dickey method.\footnote{This method consists in taking the ratio of the posterior density at the point of interest divided by the prior density at that point (Wagenmakers et al., \protect\hyperlink{ref-wagenmakers_bayesian_2010}{2010}).} These BFs can be interpreted as updating factors, from prior knowledge (what we knew before seeing the data) to posterior knowledge (what we know after seeing the data). A summary of the estimations from this model is presented in Table \ref{tab:summary}. This analysis revealed strong evidence for the hypothesis of a higher average EMG peak amplitude in the rumination condition as compared to the baseline condition for both the FRO and OOI muscles (as assessed by the BFs). However, the BFs supported the null hypothesis (i.e., the hypothesis of no difference) between the baseline and distraction conditions for the FRO and were inconclusive for both the OOI and OOS muscles.
+To model EMG peak amplitude variations in response to the rumination and distraction inductions, we fitted a Bayesian multivariate regression model with the natural logarithm of the EMG peak amplitude as an outcome and \emph{Condition} (baseline, rumination, distraction) as a categorical predictor. Therefore, the intercept represents the estimated natural logarithm of the EMG peak amplitude in the baseline condition, and the slopes for the rumination and distraction conditions represent deviations from the baseline. These analyses were conducted using the \texttt{brms} package (Bürkner, \protect\hyperlink{ref-R-brms}{2017}), an \texttt{R} implementation of Bayesian multilevel models that employs the probabilistic programming language \texttt{Stan} (Carpenter et al., \protect\hyperlink{ref-carpenter_stan_2017}{2017}). We ran four chains including each 10.000 iterations and a warmup of 2.000 iterations, using weakly informative priors on all parameters (for more details, see the \protect\hyperlink{supp}{supplementary materials}). Posterior convergence was assessed examining autocorrelation and trace plots, as well as the Gelman-Rubin statistic. Constant effects estimates were summarised via their posterior mean and 95\% credible interval. We also report Bayes factors (BFs) computed using the Savage-Dickey method.\footnote{This method consists in taking the ratio of the posterior density at the point of interest divided by the prior density at that point (Wagenmakers et al., \protect\hyperlink{ref-wagenmakers_bayesian_2010}{2010}).} These BFs can be interpreted as updating factors, from prior knowledge (what we knew before seeing the data) to posterior knowledge (what we know after seeing the data). A summary of the estimations from this model is presented in Table \ref{tab:summary}. This analysis revealed strong evidence for the hypothesis of a higher average EMG peak amplitude in the rumination condition as compared to the baseline condition for both the FRO and OOI muscles (as assessed by the BFs). However, the BFs supported the null hypothesis (i.e., the hypothesis of no difference) between the baseline and distraction conditions for the FRO and were inconclusive for both the OOI and OOS muscles.
 
 \begin{table}[H]
 
@@ -274,33 +235,20 @@ There is an infamous tradition of conducting and interpreting uninformative null
 
 As highlighted by several authors (e.g., Cohen, \protect\hyperlink{ref-cohen_earth_1994}{1994}; Pollard \& Richardson, \protect\hyperlink{ref-pollard_probability_1987}{1987}; Rouder et al., \protect\hyperlink{ref-rouder_is_2016}{2016}), concluding that an effect is probably absent solely based on a non-significant \emph{p}-value is the continuous (i.e., probabilistic) extension of the modus tollens and is not a valid argument (i.e., the conclusion does not follow from the premises). This fallacious argument is also known as the \emph{fallacy of acceptance}, the \emph{absence of evidence fallacy} or \emph{the argument from ignorance}, and proceeds as follows: ``If the null hypothesis is true, then this observation should \emph{rarely} occur. This observation occurred. Therefore, the null hypothesis is false (or has low probability)''. In short, this argument is fallacious because it fails to consider the (probability of the data under the) alternative hypothesis.
 
-This problem is tackled in modern usages of null-hypothesis significance tests by ensuring that the claim under scrutiny is submitted to \emph{severe} tests (e.g., Mayo \& Spanos, \protect\hyperlink{ref-mayo_severe_2006}{2006}; Mayo, \protect\hyperlink{ref-mayo_statistical_2018}{2018}). In general terms, the strong severity principle states that we have evidence for a claim to the extent that it survives a stringent scrutiny, that is, to the extent that it survives \emph{severe} tests. More precisely, some claim (e.g., \(\theta = 0\)) is said to be \emph{severely tested} if it had great chances of being falsified, had the claim been false. When a statistical test is under-powered (for detecting a given effect size), the claim under scrutiny is not strongly (severely) tested, hence it not possible to obtain strong or reliable evidence for the claim (bad test, no evidence).
+This problem is tackled in modern usages of null-hypothesis significance tests by ensuring that the claim under scrutiny is submitted to \emph{severe} tests (e.g., Mayo \& Spanos, \protect\hyperlink{ref-mayo_severe_2006}{2006}; Mayo, \protect\hyperlink{ref-mayo_statistical_2018}{2018}). In general terms, the strong severity principle states that we have evidence for a claim to the extent that it survives a stringent scrutiny, that is, to the extent that it survives \emph{severe} tests. More precisely, some claim (e.g., \(\theta = 0\)) is said to be \emph{severely tested} if it had great chances of being corroborated/falsified, had the claim been true/false. When a statistical test is under-powered (for detecting a given effect size), the claim under scrutiny is not strongly (severely) tested, hence it not possible to obtain strong or reliable evidence for the claim (bad test, no evidence).
 
 Anticipating the legitimate critiques on the power of their study, Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) report the results of a power analysis using the effect size reported in Nalborczyk et al. (\protect\hyperlink{ref-nalborczyk_orofacial_2017}{2017}) of \(d = 0.72\). This represents a highly optimistic estimate of the substantive effect of interest (i.e., the difference in the natural logarithm of the EMG peak amplitude between the rumination and distraction conditions) as this effect represents the standardised mean difference in EMG amplitude \emph{between a rest and a rumination periods} (Nalborczyk et al., \protect\hyperlink{ref-nalborczyk_orofacial_2017}{2017}).
 
-We suggest the (a priori) power of the study ran by Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) was much lower than suggested by the authors. Indeed, we speculate that the standardised mean difference in EMG peak amplitude between the rumination and distraction conditions may be much weaker than the standardised mean difference in EMG amplitude between the rumination and rest conditions. If we assume that the former is half the size of the latter (which seems reasonable given the high inter-individual variability in such effects, cf.~the next section but also Nalborczyk, Grandchamp, et al., \protect\hyperlink{ref-nalborczyk_can_2020}{2020}), therefore the a priori power of the main statistical test from Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) was around \(0.42\), meaning that they had less than 1 chance out of 2 to find a significant effect (given that the population effect size was actually \(0.36\)).
+\begin{figure}[!htb]
 
-\begin{Shaded}
-\begin{Highlighting}[]
-\CommentTok{\# A priori power for n = 26 and d = 0.36}
-\KeywordTok{library}\NormalTok{(pwr)}
-\KeywordTok{pwr.t.test}\NormalTok{(}
-  \DataTypeTok{n =} \DecValTok{26}\NormalTok{, }\DataTypeTok{d =} \FloatTok{0.72} \OperatorTok{/}\StringTok{ }\DecValTok{2}\NormalTok{, }\DataTypeTok{sig.level =} \FloatTok{0.05}\NormalTok{,}
-  \DataTypeTok{type =} \StringTok{"one.sample"}\NormalTok{, }\DataTypeTok{alternative =} \StringTok{"two.sided"}
-\NormalTok{  )}
-\end{Highlighting}
-\end{Shaded}
+{\centering \includegraphics[width=1\linewidth]{manuscript_files/figure-latex/power-1} 
 
-\begin{verbatim}
-## 
-##      One-sample t test power calculation 
-## 
-##               n = 26
-##               d = 0.36
-##       sig.level = 0.05
-##           power = 0.4228455
-##     alternative = two.sided
-\end{verbatim}
+}
+
+\caption{Statistical power as a function of both sample size and effect size, for a one-sample t-test with a significance level of 0.05. The white dot indicates the minimal effect size that can be detected with a probability equal or superior to 0.9 with a sample size of N = 26.}\label{fig:power}
+\end{figure}
+
+We suggest the (a priori) power of the study ran by Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) was much lower than suggested by the authors. Indeed, we speculate that the standardised mean difference in EMG peak amplitude between the rumination and distraction conditions may be much weaker than the standardised mean difference in EMG amplitude between the rumination and rest conditions. If we assume that the former is half the size of the latter (which seems reasonable given the high inter-individual variability in such effects, cf.~the next section but also Nalborczyk, Grandchamp, et al., \protect\hyperlink{ref-nalborczyk_can_2020}{2020}), therefore the a priori power of the main statistical test from Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) was around \(0.42\), meaning that they had less than 1 chance out of 2 to find a significant effect (given that the population effect size was actually \(0.36\)). Notice that whereas taking half the effect size of Nalborczyk et al. (\protect\hyperlink{ref-nalborczyk_orofacial_2017}{2017}) may seem arbitrary, Figure \ref{fig:power} shows that a one-sample t-test with a sample size of \(N = 26\) is under-powered for a vast range of effect sizes.
 
 Once again, anticipating the legitimate critique that the absence of a significant difference is not necessarily ``significant'' evidence for the absence of an effect, Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) reported the following Bayes factor (BF) analysis (p.12):
 
@@ -308,7 +256,7 @@ Once again, anticipating the legitimate critique that the absence of a significa
 ``{[}\ldots{]} therefore it is possible that the sample size of the present study lacked sufficient power to detect the effect of rumination on muscle activity. In order to test this, a Bayesian paired samples t-test was conducted for the peak log values of muscle activity between the rumination and distraction conditions. This revealed strong evidence in favour of the alternative hypothesis for the FRO muscle (\(B_{10} = 18.79\)), and moderate evidence in favour of the null hypothesis for the OOS (\(B_{10} = 0.232\)) and OOI (\(B_{10} = 0.278\)) muscles, according to current guidelines for interpreting Bayes factors {[}43{]}.''
 \end{quote}
 
-While we appreciate the effort, the current approach poses new problems. First, contrary to what the authors suggest, whereas computing a BF indeed allows assessing the \emph{relative evidence} for the null, computing a BF (i.e., comparing two models) does not solve at all the problem of low power. More precisely, the sensitivity (i.e., the ability to attain a certain goal) of an experimental design to detect a given effect is an issue for both frequentist and Bayesian statistical tests. To illustrate this point, we present below the results of two simulations.
+While we appreciate the effort, the current approach poses new problems. First, contrary to what the authors suggest, whereas computing a BF indeed allows assessing the \emph{relative evidence} for the null, computing a BF (i.e., comparing two models) does not solve at all the problem of low power. More precisely, the sensitivity (i.e., the ability to attain a certain goal) of an experimental design to detect a given effect is an issue for both frequentist and Bayesian statistical tests. To illustrate this point, we simulated 10.000 datasets (for \(N = 26\)) under the assumption of either no effect (i.e., the null hypothesis of \(d = 0\)), an effect size of \(d = 0.36\) (i.e., the supposed target effect size in Moffatt et al., \protect\hyperlink{ref-moffatt_inner_2020}{2020}), or an effect size of \(d = 0.72\) (i.e., the effect size reported in Nalborczyk et al., \protect\hyperlink{ref-nalborczyk_orofacial_2017}{2017}).
 
 \begin{figure}[!htb]
 
@@ -319,22 +267,7 @@ While we appreciate the effort, the current approach poses new problems. First, 
 \caption{Illustrating the distribution of Bayes factors in favour of the alternative hypothesis for different population effect sizes (N = 26). In the left panel, the effect size is fixed to d = 0 (i.e., the null hypothesis), in the middle panel, it is fixed to d = 0.36 (i.e., the supposed target effect size in Moffatt et al., 2020), and in the right panel, the effect size is fixed to d = 0.72 (i.e., the effect size reported in Nalborczyk et al., 2017). The red vertical dashed line indicates the value of the BF computed for the OOI by Moffatt et al. (2020), on the log scale.}\label{fig:bf-dance}
 \end{figure}
 
-First, we simulated 10.000 datasets (for \(N = 26\)) under the assumption of either no effect (i.e., the null hypothesis of \(d = 0\)), an effect size of \(d = 0.36\) (i.e., the supposed target effect size in Moffatt et al., \protect\hyperlink{ref-moffatt_inner_2020}{2020}), or an effect size of \(d = 0.72\) (i.e., the effect size reported in Nalborczyk et al., \protect\hyperlink{ref-nalborczyk_orofacial_2017}{2017}). As shown in Figure \ref{fig:bf-dance}, the distribution of BFs computed under each hypothesis reveals important inter-simulation variability. For instance, under the null hypothesis, 6.46\% of the computed BFs are above 0 and hence support the alternative hypothesis (although the ``true'' effect size is \(d = 0\)). When the ``true'' effect size is of \(d = 0.36\), 72.06\% of the BFs are below 0 and hence support the null hypothesis (although the true effect size is actually non-null). When the ``true'' effect size is of \(d = 0.72\), 24.46\% of the BFs are still below 0. In other words, for small sample and effect sizes, BFs have high error rates.\footnote{To assess the extent to which the BF computed for the OOI by Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) (i.e., \(\text{BF}_{10} = 0.278\)) is ``surprising'' given or ``compatible'' with the hypothesis of an effect size of \(d = 0.36\), we can compute the probability of obtaining this finding or a more extreme finding given the hypothesis, which is approximately equal to 0.29.}
-
-Second, we conducted another simulation with the aim of assessing the relation between the sample size and the value of the BF. In the previous section, we fitted a multivariate Bayesian regression model with varying-intercepts by participant and weakly informative priors on the EMG data collected by Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}). Using this model, we i) generated new datasets from the posterior predictive distribution of this model and ii) we computed the BF in favour of the alternative hypothesis (\(\text{BF}_{10}\)) using the \texttt{BayesFactor} package (Morey \& Rouder, \protect\hyperlink{ref-R-BayesFactor}{2018}). We used a ``medium'' prior (i.e., \(r = \sqrt{2}/2\)) on the scale parameter of the Cauchy prior for the alternative hypothesis. We repeated this procedure for varying sample sizes from 20 to 200 participants (by increments of 10 participants) with \(1000\) simulations (i.e., 1000 simulated datasets) for each sample size.
-
-\begin{figure}[!htb]
-
-{\centering \includegraphics[width=1\linewidth]{manuscript_files/figure-latex/simulated-power-1} 
-
-}
-
-\caption{Average natural logarithm of the Bayes factor in favour of the alternative hypothesis, along with its standard error, computed over 1000 datasets of increasing size simulated from the posterior predictive distribution of the varying-intercept multivariate Bayesian regresion model, fitted on the data from Moffatt et al. (2020). A log-BF belows 0 represents evidence for the null hypothesis (relative to the alternative hypothesis) and a log-BF above 0 represents evidence for the alternative hypothesis (relative to the null hypothesis).}\label{fig:simulated-power}
-\end{figure}
-
-As shown in Figure \ref{fig:simulated-power}, the natural logarithm of the BF in favour of the alternative hypothesis is growing proportionally with sample size. More precisely, whereas BFs computed on small samples (i.e., below 80 participants) support the null hypothesis, BFs computed on larger samples support the alternative hypothesis for all three facial muscles. For instance, the average \(\text{BF}_{10}\) computed for the OOI muscle with a sample size of 160 participants is of \(\exp(2.18) \approx 8.85\), indicating that these data are approximately \(8.85\) times more likely under the alternative hypothesis than under the null hypothesis. To sum up, this reveals that although at low sample sizes, the BF may provide (weak) evidence for the null hypothesis (relative to the alternative hypothesis), this pattern may very well reverse for higher sample sizes.
-
-We should keep in mind some limitations of this analysis, which uses simulated datasets form the posterior predictive distribution estimated on the data collected by Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}). This analysis resembles to the Bayesian analogue of the frequentist post-hoc power analysis, which has been much criticised (e.g., Lakens, \protect\hyperlink{ref-lakens_20_2014}{2014}). A crucial assumption of the present analysis is that the data from Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) is our best source of information regarding the main effect of interest. However, the present analysis also differs from the frequentist post-hoc power analysis on several grounds. First, with the present analysis, we do not aim to assess the ability of our statistical test to pass some dichotomic threshold (e.g., accept/reject). Instead, we aim to assess how the \(\text{BF}_{10}\) (i.e., the evidence for the alternative hypothesis, relative to the null hypothesis) behaves with varying sample sizes. Second, the present analysis relies on the posterior predictive distribution of the model fitted on the data from Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}), which naturally incorporates uncertainty about the effect of interest. By simulating datasets of varying sample sizes from the posterior predictive distribution (and by relying on a large number of simulations), uncertainty about the effect size is naturally incorporated into the results of the simulation.
+As shown in Figure \ref{fig:bf-dance}, the distribution of BFs computed under each hypothesis reveals important inter-simulation variability. For instance, under the null hypothesis, 6.46\% of the computed BFs are above 0 and hence support the alternative hypothesis (although the ``true'' effect size is \(d = 0\)). When the ``true'' effect size is of \(d = 0.36\), 72.06\% of the BFs are below 0 and hence support the null hypothesis (although the true effect size is actually non-null). When the ``true'' effect size is of \(d = 0.72\), 24.46\% of the BFs are still below 0. In other words, for small sample and effect sizes, BFs have high error rates. To assess the extent to which the BF computed for the OOI by Moffatt et al. (\protect\hyperlink{ref-moffatt_inner_2020}{2020}) (i.e., \(\text{BF}_{10} = 0.278\)) is ``surprising'' given or ``compatible'' with some effect size, we can compute the proportion of simulated BFs that are equal or more extreme than the one reported by the authors for each hypothesis, which is approximately equal to 0.57, 0.29, and 0.03, for the hypothesis of \(d = 0\), \(d = 0.36\), and \(d = 0.72\), respectively. In other words, observing a \(\text{BF}_{10} = 0.278\) is more compatible with the hypothesis of \(d = 0\) (i.e., the null hypothesis) than with the hypothesis of \(d = 0.36\) or \(d = 0.72\) (at this sample size).
 
 \hypertarget{within-subject-manipulation-of-rumination-and-distraction}{%
 \subsection{Within-subject manipulation of rumination and distraction}\label{within-subject-manipulation-of-rumination-and-distraction}}
@@ -442,9 +375,6 @@ Guillot, A., Di Rienzo, F., MacIntyre, T., Moran, A., \& Collet, C. (2012). Imag
 \leavevmode\hypertarget{ref-haaf_developing_2017}{}%
 Haaf, J. M., \& Rouder, J. N. (2017). Developing constraint in Bayesian mixed models. \emph{Psychological Methods}, \emph{22}(4), 779--798. \url{https://doi.org/10.1037/met0000156}
 
-\leavevmode\hypertarget{ref-lakens_20_2014}{}%
-Lakens, D. (2014). The 20\% Statistician: Observed power, and what to do if your editor asks for post-hoc power analyses. In \emph{The 20\% Statistician}.
-
 \leavevmode\hypertarget{ref-loevenbruck_cognitive_2018}{}%
 Lœvenbruck, H., Grandchamp, R., Rapin, L., Nalborczyk, L., Dohen, M., Perrier, P., Baciu, M., \& Perrone-Bertolotti, M. (2018). A cognitive neuroscience view of inner language: To predict and to hear, see, feel. In P. Langland-Hassan \& A. Vicente (Eds.), \emph{Inner speech: New voices} (p. 37). Oxford University Press.
 
@@ -480,9 +410,6 @@ Meehl, P. E. (1967). Theory-testing in Psychology and Physics: A methodological 
 
 \leavevmode\hypertarget{ref-moffatt_inner_2020}{}%
 Moffatt, J., Mitrenga, K. J., Alderson-Day, B., Moseley, P., \& Fernyhough, C. (2020). Inner experience differs in rumination and distraction without a change in electromyographical correlates of inner speech. \emph{PLOS ONE}, \emph{15}(9), e0238920. \url{https://doi.org/10.1371/journal.pone.0238920}
-
-\leavevmode\hypertarget{ref-R-BayesFactor}{}%
-Morey, R. D., \& Rouder, J. N. (2018). \emph{BayesFactor: Computation of bayes factors for common designs}. \url{https://CRAN.R-project.org/package=BayesFactor}
 
 \leavevmode\hypertarget{ref-R-here}{}%
 Müller, K. (2017). \emph{Here: A simpler way to find your files}. \url{https://CRAN.R-project.org/package=here}
@@ -541,5 +468,6 @@ Xie, Y. (2015). \emph{Dynamic documents with R and knitr} (2nd ed.). Chapman; Ha
 \leavevmode\hypertarget{ref-R-rmarkdown}{}%
 Xie, Y., Allaire, J. J., \& Grolemund, G. (2018). \emph{R markdown: The definitive guide}. Chapman; Hall/CRC. \url{https://bookdown.org/yihui/rmarkdown}
 \end{cslreferences}
+
 
 \end{document}
