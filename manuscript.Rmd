@@ -420,8 +420,8 @@ Anticipating the legitimate critiques on the power of their study, @moffatt_inne
 
 # creating a grid of possible sample and effect sizes
 parameter_grid <- expand.grid(
-  sample_size = seq.int(from = 10, to = 100, length.out = 1e2),
-  effect_size = seq.int(from = 0.1, to = 1, length.out = 1e3)
+  sample_size = seq.int(from = 10, to = 100, length.out = 100),
+  effect_size = seq.int(from = 0.1, to = 1, length.out = 300)
   )
 
 # computing power for all combinations of sample and effect sizes
@@ -445,7 +445,11 @@ parameter_grid %>%
   geom_contour_filled(aes(z = power), alpha = 0.8) +
   # geom_raster(aes(fill = power), interpolate = TRUE) +
   geom_line(
-    data = parameter_grid %>% filter(round(power, 3) == 0.9),
+    data = parameter_grid %>%
+      filter(round(power, 2) == 0.9) %>%
+      group_by(sample_size) %>%
+      summarise(effect_size = mean(effect_size), power = mean(power) ) %>%
+      ungroup,
     color = "black", lwd = 0.8
     ) +
   geom_segment(
@@ -461,7 +465,7 @@ parameter_grid %>%
     pch = 21, size = 3, fill = "white"
     ) +
   theme_bw(base_size = 12) +
-  labs(x = "Number of participants (per group)", y = "Standardised mean difference") +
+  labs(x = "Number of participants", y = "Standardised mean difference") +
   coord_cartesian(expand = FALSE) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank() ) +
   # scale_fill_manual(values = ., labels = seq(0.304, 2.129, length.out = 10) %>% round(2) )+
