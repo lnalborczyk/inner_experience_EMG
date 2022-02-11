@@ -1,4 +1,3 @@
-base
 wordcountaddin
 coda
 Matrix
@@ -28,3 +27,7 @@ pwr
 sylly
 koRpus
 koRpus.lang.en
+tinylabels
+simhelpers
+future
+furrr

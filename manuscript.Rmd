@@ -1,7 +1,6 @@
 ---
 title: "Re-analysing the data from @moffatt_inner_2020: What can we learn from an under-powered absence of difference?"
 shorttitle: "The absence of evidence fallacy"
-# note: \textcolor{red}{This is an example of a note}
 author: 
   - name: "Ladislas Nalborczyk"
     affiliation: "1, 2, 3"
@@ -15,7 +14,7 @@ affiliation:
     institution: Aix Marseille Univ, CNRS, LPC, Marseille, France
   - id: 3
     institution: Aix Marseille Univ, CNRS, LNC, Marseille, France
-abstract: "@moffatt_inner_2020 reported the results of an experiment (N = 26 in the final sample) comparing the facial electromyographic correlates of mental rumination and distraction, following an experimentally induced stressor. Based on the absence of significant difference in the perioral muscular activity between the rumination and distraction conditions, @moffatt_inner_2020 concluded that *self-reported* inner experience was unrelated to peripheral muscular activity as assessed using surface electromyography. We suggest this conclusion is at best hasty. Indeed, concluding on the absence of an effect based on an under-powered non-significant *p*-value is strongly uninformative. In this short commentary, we show that there is limited evidence for the main conclusion put forward by @moffatt_inner_2020. We suggest ways forward, both from a theoretical and methodological perspective. Complete source code, reproducible analyses, and figures are available at https://osf.io/ba3gk/."
+abstract: "@moffatt_inner_2020 reported the results of an experiment (N = 26 in the final sample) comparing the facial electromyographic correlates of mental rumination and distraction, following an experimentally induced stressor. Based on the absence of significant difference (and BFs between 3.6 and 4.3) in the perioral muscular activity between the rumination and distraction conditions, @moffatt_inner_2020 concluded that *self-reported* inner experience was unrelated to peripheral muscular activity as assessed using surface electromyography. In this short commlentary, we show that there is limited evidence for the main conclusion put forward by @moffatt_inner_2020, and we suggest ways forward, both from a theoretical and a methodological perspective. Complete source code, reproducible analyses, and figures are available at https://osf.io/ba3gk/."
 keywords: NHST, Bayes factor, reanalysis, inner speech, rumination, electromyography
 csl: csl/apa7.csl
 classoption: man, donotrepeattitle
@@ -23,7 +22,8 @@ linenumbers: yes
 floatsintext: yes
 link-citations: true
 numbersections: false
-mask: yes # masking author names
+wordcount: "`r wordcountaddin::word_count(knitr::current_input() )` (excluding abstract, references, tables, and figures)"
+# mask: yes # masking author names
 bibliography: [bib/library.bib, bib/r-references.bib]
 nocite: | 
   @R-base, @R-knitr, @R-rmarkdown, @R-tidyverse, @R-papaja,
@@ -40,16 +40,15 @@ editor_options:
 ```{r setup, include = FALSE, message = FALSE, warning = FALSE}
 library(wordcountaddin)
 library(BayesFactor)
-library(ggbeeswarm)
+library(simhelpers)
 library(rmarkdown)
 library(tidyverse)
-library(patchwork)
 library(parallel)
 library(papaja)
 library(readxl)
+library(future)
+library(furrr)
 library(knitr)
-library(BEST)
-library(brms)
 library(glue)
 library(here)
 library(pwr)
@@ -64,36 +63,18 @@ knitr::opts_chunk$set(
   )
 
 # counting words in the current .Rmd file
-wordcount <- word_count(knitr::current_input() )
+# wordcount <- word_count(knitr::current_input() )
 ```
-
-Wordcount (excluding abstract, references, tables, and figures): `r wordcount`
-
-\newpage
 
 # Introduction
 
 The activity of silently talking to oneself or "inner speech" is a foundational ability, allowing oneself to remember, plan, self-motivate, or self-regulate [for reviews, see @alderson-day_inner_2015; @perrone-bertolotti_what_2014; @loevenbruck_cognitive_2018]. However, whereas the use of inner speech is associated with many adaptive functions in everyday life, inner speech dysfunctions can be identified in multiple psychological disorders. For instance, rumination, broadly defined as unconstructive repetitive thinking about past events and current mood states [@Martin], is involved in the onset and maintenance of serious mental disorders such as depression, anxiety, eating disorders, or substance abuse [for review, see @Nolen-Hoeksema2008].
 
-Given the predominantly verbal nature of rumination [e.g., @ehring_repetitive_2008; @goldwin_concreteness_2012; @goldwin_concreteness_2013; @mclaughlin_effects_2007], we previously proposed to consider rumination as a form of inner speech and to study it using the methods that have historically been used to study other forms of inner speech, namely, by using surface electromyography (EMG) and motor interference protocols [e.g., @nalborczyk_dissociating_2021; @nalborczyk_orofacial_2017; @nalborczyk_understanding_2019; @nalborczyk_articulatory_2020]. We first showed that induced rumination was accompanied by increased facial (both over a forehead and a perioral site) muscular activity in comparison to a rest period [@nalborczyk_orofacial_2017]. However, because rumination was only compared to a rest period, it remained uncertain whether this perioral activity was specifically related to (inner) speech processes. Therefore, we ran a follow-up study comparing verbal to non-verbal rumination, which suggested that the facial EMG correlates we had previously identified were not specifically related to the verbal content of the ruminative thoughts [@nalborczyk_dissociating_2021]. We discussed these findings in length and proposed several theoretical interpretations that can account for these results in the discussion of @nalborczyk_dissociating_2021 and more extensively in @nalborczyk_understanding_2019.
+Given the predominantly verbal nature of rumination [e.g., @ehring_repetitive_2008; @goldwin_concreteness_2012; @goldwin_concreteness_2013; @mclaughlin_effects_2007], we previously proposed to consider rumination as a form of inner speech and to study it using the methods that have historically been used to study other forms of inner speech, namely, by using surface electromyography (EMG) and motor interference protocols [e.g., @nalborczyk_dissociating_2021; @nalborczyk_orofacial_2017; @nalborczyk_understanding_2019; @nalborczyk_articulatory_2022]. We first showed that induced rumination was accompanied by increased facial (both over a forehead and a perioral site) muscular activity in comparison to a rest period [@nalborczyk_orofacial_2017]. However, because rumination was only compared to a rest period, it remained uncertain whether this perioral activity was specifically related to (inner) speech processes. Therefore, we ran a follow-up study comparing verbal to non-verbal rumination, which suggested that the facial EMG correlates we had previously identified were not specifically related to the verbal content of the ruminative thoughts [@nalborczyk_dissociating_2021]. We discussed these findings in length and proposed several theoretical interpretations that can account for these results in the discussion of @nalborczyk_dissociating_2021 and more extensively in @nalborczyk_understanding_2019.
 
-<!--
+@moffatt_inner_2020 designed an experiment with the aim of refining our understanding of the involvement of the speech motor system in different varieties of inner speech and clarifying the relation between the peripheral correlates of inner speech and (self-reported) subjective experience. Their main conclusion is that inner experience between induced rumination and distraction differs "without a change in electromyographic correlates of inner speech" (p.1). In other words, they suggest that the subjective experience of inner speech is unrelated (or loosely related) to the electromyographic correlates of inner speech, which are thought to be represented by the EMG amplitude recorded over the orbicularis oris inferior and orbicularis oris superior muscles. However, for this in-sample observation to be of interest in an out-of-sample context (i.e., to be informative for other non-observed individuals, or said otherwise, to bring information about the population), this absence of difference should be substantiated by adequately-powered statistical tests (given the target effect size) as well as reliable measures. This is unlikely to be the case here, for reasons that we will present and discuss in the present article.
 
-Although these points were not addressed by @moffatt_inner_2020, their experimental design nevertheless had the potential to inform our understanding of the involvement of the speech motor system in different varieties of inner speech as well as to clarify the relation between the peripheral correlates of inner speech and (self-reported) subjective experience.
-
--->
-
-@moffatt_inner_2020 designed an experiment with the aim of refining our understanding of the involvement of the speech motor system in different varieties of inner speech and clarifying the relation between the peripheral correlates of inner speech and (self-reported) subjective experience. Their main conclusion is that inner experience between induced rumination and distraction differs "without a change in electromyographic correlates of inner speech" (p.1). In other words, they suggest that the subjective experience of inner speech is unrelated (or loosely related) to the electromyographic correlates of inner speech, which are thought to be represented mostly by the EMG amplitude recorded over the orbicularis oris inferior and orbicularis oris superior muscles. However, for this in-sample observation to be of interest in an out-of-sample context (i.e., to be informative for other non-observed individuals, or said otherwise, to bring information about the population), this absence of difference should be substantiated by adequately-powered statistical tests (given the target effect size) as well as reliable measures. This is unlikely to be the case here, for reasons that we will present and discuss in the present article.
-
-<!--
-
-Moreover, a simple visual exploration of the data reveals important variability between individuals in the main effect of interest. That is, some participants had higher perioral muscular activity in the rumination condition than in the distraction condition, and some other participants showed the reverse pattern. This suggests unexplored variation in the determinants of this effect (e.g., the content of the inner experience). In the following, we explore each of these limitations and suggests ways forward, both from a theoretical and from a methodological perspective.
-
-Indeed, the relation between the inner experience and the physiological correlates of inner speech production was only inferred from group averages. However, given the important inter-individual variability, this reasoning appears highly problematic
-
--->
-
-# Re-analysing the data from @moffatt_inner_2020
+# Reconsidering the data from @moffatt_inner_2020
 
 ## Exploring the data
 
@@ -196,211 +177,6 @@ df2 %>%
     scale_fill_brewer(palette = "Dark2", direction = 1)
 ```
 
-<!--
-
-To model EMG peak amplitude variations in response to the rumination and distraction inductions, we fitted a Bayesian multivariate regression model with the natural logarithm of the EMG peak amplitude as an outcome and *Condition* (baseline, rumination, distraction) as a categorical predictor. Therefore, the intercept represents the estimated natural logarithm of the EMG peak amplitude in the baseline condition, and the slopes for the rumination and distraction conditions represent deviations from the baseline. These analyses were conducted using the `brms` package [@R-brms], an `R` implementation of Bayesian multilevel models that employs the probabilistic programming language `Stan` [@carpenter_stan_2017]. We ran four chains including each 10.000 iterations and a warmup of 2.000 iterations, using weakly informative priors on all parameters (for more details, see the [supplementary materials](#supp)). Posterior convergence was assessed examining autocorrelation and trace plots, as well as the Gelman-Rubin statistic. Constant effects estimates were summarised via their posterior mean and 95% credible interval. We also report Bayes factors (BFs) computed using the Savage-Dickey method.^[This method consists in taking the ratio of the posterior density at the point of interest divided by the prior density at that point [@wagenmakers_bayesian_2010].] These BFs can be interpreted as updating factors, from prior knowledge (what we knew before seeing the data) to posterior knowledge (what we know after seeing the data). A summary of the estimations from this model is presented in Table \@ref(tab:summary). This analysis revealed strong evidence for the hypothesis of a higher average EMG peak amplitude in the rumination condition as compared to the baseline condition for both the FRO and OOI muscles (as assessed by the BFs). However, the BFs supported the null hypothesis (i.e., the hypothesis of no difference) between the baseline and distraction conditions for the FRO and were inconclusive for both the OOI and OOS muscles.
-
-```{r models, results = "hide"}
-##############################
-# Bayesian multilevel models #
-##############################
-
-# priors for the constant-effects model
-priors_constant <- c(
-    prior(normal(0, 5), class = b, coef = Intercept, resp = "FRO"),
-    prior(normal(0, 1), class = b, resp = "FRO"),
-    prior(exponential(1), class = sigma, resp = "FRO"),
-    prior(normal(0, 5), class = b, coef = Intercept, resp = "OOS"),
-    prior(normal(0, 1), class = b, resp = "OOS"),
-    prior(exponential(1), class = sigma, resp = "OOS"),
-    prior(normal(0, 5), class = b, coef = Intercept, resp = "OOI"),
-    prior(normal(0, 1), class = b, resp = "OOI"),
-    prior(exponential(1), class = sigma, resp = "OOI")
-    )
-
-# fitting the model
-constant_effects <- brm(
-    mvbind(FRO, OOS, OOI) ~ 0 + Intercept + condition,
-    family = gaussian(),
-    prior = priors_constant,
-    data = df2,
-    chains = 4, cores = 4,
-    warmup = 2000, iter = 10000,
-    control = list(adapt_delta = 0.95),
-    sample_prior = TRUE,
-    file = here("models/constant_effects")
-    )
-
-# priors for the varying-effects model
-priors_varying <- c(
-    prior(normal(0, 5), class = b, coef = Intercept, resp = "FRO"),
-    prior(normal(0, 1), class = b, resp = "FRO"),
-    prior(exponential(1), class = sigma, resp = "FRO"),
-    prior(exponential(1), class = sd, resp = "FRO"),
-    prior(normal(0, 5), class = b, coef = Intercept, resp = "OOS"),
-    prior(normal(0, 1), class = b, resp = "OOS"),
-    prior(exponential(1), class = sigma, resp = "OOS"),
-    prior(exponential(1), class = sd, resp = "OOS"),
-    prior(normal(0, 5), class = b, coef = Intercept, resp = "OOI"),
-    prior(normal(0, 1), class = b, resp = "OOI"),
-    prior(exponential(1), class = sigma, resp = "OOI"),
-    prior(exponential(1), class = sd, resp = "OOI")
-    )
-
-# fitting the model
-varying_effects <- brm(
-    mvbind(FRO, OOS, OOI) ~ 0 + Intercept + condition + (0 + Intercept | ID),
-    family = gaussian(),
-    prior = priors_varying,
-    data = df2,
-    chains = 4, cores = 4,
-    warmup = 2000, iter = 10000,
-    control = list(adapt_delta = 0.95),
-    sample_prior = TRUE,
-    file = here("models/varying_effects")
-    )
-```
-
-```{r bf, eval = FALSE, fig.width = 10, fig.cap = "Savage-Dickey Bayes factor for the difference between the rumination and distraction conditions for each muscle. The BF is computed as the ratio of the posterior density to the prior density at $\\theta = 0$."}
-# BF testing
-hyp_fro <- hypothesis(
-    x = varying_effects,
-    hypothesis = "FRO_conditionDIS = FRO_conditionRUM"
-    )
-
-p1 <- plot(hyp_fro, plot = FALSE, theme = theme_bw(base_size = 12) )[[1]] +
-    geom_vline(xintercept = 0, linetype = 2) +
-    coord_cartesian(xlim = c(-5, 5), ylim = c(0, 7.5) ) +
-    theme_bw(base_size = 12, base_family = "Open Sans") +
-    theme(legend.title = element_blank() ) +
-    labs(
-      x = "Log EMG peak amplitude",
-      y = "Probability density",
-      title = paste0(
-        "BF10 = ", round(1 / hyp_fro$hypothesis$Evid.Ratio, 3),
-        " (BF01 = ", round(hyp_fro$hypothesis$Evid.Ratio, 3), ")"
-        )
-      )
-
-hyp_ooi <- hypothesis(
-    varying_effects,
-    "OOI_conditionDIS = OOI_conditionRUM"
-    )
-
-p2 <- plot(hyp_ooi, plot = FALSE, theme = theme_bw(base_size = 12) )[[1]] +
-    geom_vline(xintercept = 0, linetype = 2) +
-    coord_cartesian(xlim = c(-5, 5), ylim = c(0, 7.5) ) +
-    theme_bw(base_size = 12, base_family = "Open Sans") +
-    theme(legend.title = element_blank() ) +
-    labs(
-      x = "Log EMG peak amplitude",
-      title = paste0(
-        "BF10 = ", round(1 / hyp_ooi$hypothesis$Evid.Ratio, 3),
-        " (BF01 = ", round(hyp_ooi$hypothesis$Evid.Ratio, 3), ")"
-        )
-      )
-
-hyp_oos <- hypothesis(
-    varying_effects,
-    "OOS_conditionDIS = OOS_conditionRUM"
-    )
-
-p3 <- plot(hyp_oos, plot = FALSE, theme = theme_bw(base_size = 12) )[[1]] +
-    geom_vline(xintercept = 0, linetype = 2) +
-    coord_cartesian(xlim = c(-5, 5), ylim = c(0, 7.5) ) +
-    theme_bw(base_size = 12, base_family = "Open Sans") +
-    theme(legend.title = element_blank() ) +
-    labs(
-      x = "Log EMG peak amplitude",
-      title = paste0(
-        "BF10 = ", round(1 / hyp_oos$hypothesis$Evid.Ratio, 3),
-        " (BF01 = ", round(hyp_oos$hypothesis$Evid.Ratio, 3), ")"
-        )
-      )
-
-p1 + p2 + p3 + plot_layout(guides = "collect") & theme(legend.position = "bottom")
-```
-
-```{r summary, result = "asis"}
-changeSciNot <- function(n) {
-  
-  output <- format(n, digits = 4, scientific = TRUE)
-  output <- sub("e", "*10^", output)
-  output <- sub("\\+0?", "", output)
-  output <- sub("-0?", "-", output)
-  output
-  
-}
-
-summary_varying_effects <-
-    # retrieve estimations from bmod5
-    summary(varying_effects, prob = 0.95)$fixed %>%
-    # convert to dataframe
-    data.frame %>%
-    # sets rownames as the first column
-    rownames_to_column(var = "response") %>%
-    # removing ESS information
-    dplyr::select(-Bulk_ESS, -Tail_ESS) %>%
-    # rename columns
-    magrittr::set_colnames(
-        c("Term", "Estimate", "SE", "Lower", "Upper", "Rhat")
-        ) %>%
-    # compute BF for each effect
-    mutate(
-        BF10 = 1 / hypothesis(
-          varying_effects, glue("{Term} = 0")
-          )$hypothesis$Evid.Ratio
-        ) %>%
-    # round BFs
-    mutate(
-      BF10 = ifelse(
-        BF10 < 0.001 | BF10 > 1e3,
-        changeSciNot(abs(BF10) ),
-        round(BF10, 3)
-        )
-      ) %>%
-    # if numeric, round to 3 decimals
-    mutate_if(is.numeric, round, 3)
-
-apa_table(
-    summary_varying_effects,
-    placement = "H",
-    digits = 3,
-    align = c("l", rep("c", 6) ),
-    caption = "Estimated value of the natural logarithm of the EMG peak amplitude in each condition and for each muscle.",
-    note = "For each effect, the 'Estimate' reports the estimated average value of the natural logarithm of the EMG peak amplitude, followed by its standard error (SE). The 'Lower' and 'Upper' columns contain the lower and upper bounds of the 95% CrI, whereas the 'Rhat' column reports the Gelman-Rubin statistic. The last column reports the BF in favour of the alternative hypothesis (relative to the null hypothesis).",
-    small = TRUE,
-    escape = TRUE
-    )
-```
-
-Because the result of a Bayesian analysis is a joint posterior probability over all parameters of the model, we can compute the posterior distribution of the difference between any pair of conditions. In Figure \@ref(fig:posterior), we represent the posterior distribution of the difference in EMG peak amplitude between the rumination and distraction conditions for each muscle. This figure reveals that the most probable value for this difference was $\beta = 0.228$ (95% CrI [0.098, 0.357]) for the FRO muscle, $\beta = 0.081$ (95% CrI [-0.155, 0.324]) for the OOI muscle, and $\beta = 0.047$ (95% CrI [-0.167, 0.27]) for the OOS muscle. Moreover, comparing the posterior distribution to $\theta = 0$ reveals that there is a probability of 0.753 that the average peak EMG amplitude recorded over the OOI is higher in the rumination condition than in the distraction condition [given the model, the priors, and the data from @moffatt_inner_2020].
-
-```{r posterior, fig.width = 10, fig.height = 4, eval = TRUE, fig.cap = "Posterior distribution of the difference in EMG peak amplitude between the rumination and distraction condition for each muscle, along with its mean and 95\\% credible interval."}
-# extracts posterior samples
-post <- posterior_samples(varying_effects)
-
-# grid of plots
-par(mfrow = c(1, 3) )
-
-plotPost(
-    post$b_FRO_conditionRUM - post$b_FRO_conditionDIS,
-    compVal = 0, xlab = "Rumination - Distraction", main = "FRO"
-    )
-
-plotPost(
-    post$b_OOI_conditionRUM - post$b_OOI_conditionDIS,
-    compVal = 0, xlab = "Rumination - Distraction", main = "OOI"
-    )
-
-plotPost(
-    post$b_OOS_conditionRUM - post$b_OOS_conditionDIS,
-    compVal = 0, xlab = "Rumination - Distraction", main = "OOS"
-    )
-```
-
--->
-
 ## Conclusions from under-powered null-hypothesis significance tests
 
 There is an infamous tradition of conducting and interpreting uninformative null-hypothesis significance tests in Psychology [e.g., @meehl_appraising_1990-1; @harlow_problem_1997; @meehl_theoretical_1978; @meehl_theory-testing_1967; @meehl_why_1990]. By "uninformative", we mean that some null-hypothesis significance tests are simply not diagnostic with regards to the substantive effect of interest (e.g., whether there is a difference between conditions A and B).
@@ -409,7 +185,7 @@ As highlighted by several authors [e.g., @cohen_earth_1994; @pollard_probability
 
 This problem is tackled in modern usages of null-hypothesis significance tests by ensuring that the claim under scrutiny is submitted to *severe* tests [e.g., @mayo_statistical_2018; @mayo_severe_2006]. In general terms, the strong severity principle states that we have evidence for a claim to the extent that it survives a stringent scrutiny, that is, to the extent that it survives *severe* tests. More precisely, some claim (e.g., $\theta = 0$) is said to be *severely tested* if it had great chances of being corroborated/falsified, had the claim been true/false. When a statistical test is under-powered (for detecting a given effect size), the claim under scrutiny is not strongly (severely) tested, hence it not possible to obtain strong or reliable evidence for the claim (bad test, no evidence).
 
-## Enthusiastic prior specifications
+## Optimistic a priori power analysis
 
 Anticipating the legitimate critiques on the power of their study, @moffatt_inner_2020 report the results of a power analysis using the effect size reported in @nalborczyk_orofacial_2017 of $d = 0.72$. This represents a highly optimistic estimate of the substantive effect of interest (i.e., the difference in the natural logarithm of the EMG peak amplitude between the rumination and distraction conditions) as this effect represents the standardised mean difference in EMG amplitude *between a rest and a rumination periods* as estimated in @nalborczyk_orofacial_2017.
 
@@ -571,10 +347,8 @@ Once again, anticipating the legitimate critique that the absence of a significa
 
 However, the current approach poses new problems. First, contrary to what the authors suggest, whereas computing a BF indeed allows assessing the *relative evidence* for the null, computing a BF (i.e., comparing two models) does not solve the problem of low power. More precisely, the sensitivity (i.e., the ability to attain a certain goal) of an experimental design to detect a given effect is an issue for both frequentist and Bayesian statistical tests. To illustrate this point, we simulated 10.000 datasets (for $N = 26$) under the assumption of either no effect (i.e., the null hypothesis of $d = 0$), an effect size of $d = 0.36$ [i.e., the supposed target effect size in @moffatt_inner_2020], or an effect size of $d = 0.72$ [i.e., the effect size reported in @nalborczyk_orofacial_2017].
 
-```{r bf-dance, fig.cap = "Illustrating the distribution of Bayes factors in favour of the alternative hypothesis for different population effect sizes (N = 26). In the left panel, the effect size is fixed to d = 0 (i.e., the null hypothesis), in the middle panel, it is fixed to d = 0.36 (i.e., the supposed target effect size in Moffatt et al., 2020), and in the right panel, the effect size is fixed to d = 0.72 (i.e., the effect size reported in Nalborczyk et al., 2017). The red vertical dashed line indicates the value of the BF computed for the OOI by Moffatt et al. (2020), on the log scale."}
+```{r bf-dance, fig.cap = "Illustrating the distribution of Bayes factors in favour of the alternative hypothesis for different population effect sizes (N = 26). In the left panel, the effect size is fixed to d = 0 (i.e., the null hypothesis), in the middle panel, it is fixed to d = 0.36 (i.e., the supposed target effect size in Moffatt et al., 2020), and in the right panel, the effect size is fixed to d = 0.72 (i.e., the effect size reported in Nalborczyk et al., 2017). The red vertical dashed line indicates the value of the BF computed for the OOI by Moffatt et al. (2020), on the logarithmic scale. The grey shaded area represents the conventional (but questionable) interval in which BFs are usually considered as inconclusive."}
 # inspired from http://daniellakens.blogspot.com/2016/07/dance-of-bayes-factors.html
-# population effect size
-cohensd <- 0.36
 
 # sample size in Moffatt et al. (2020)
 n <- 26
@@ -582,135 +356,89 @@ n <- 26
 # number of simulated experiments
 nsims <- 1e4
 
-# initialises an empty array to store the results
-results <- data.frame(
-  BF10 = numeric(nsims),
-  BF10_null = numeric(nsims),
-  BF10_double = numeric(nsims)
-  )
+# defining the combinations of parameters values to explore
+params <- crossing(cohensd = c(0, 0.36, 0.72), iterations = 1:nsims) %>%
+    mutate(seed = round(runif(n = 1, min = 0, max = 1) * 2^30) + 1:n() )
 
-for (i in 1:nsims) { # for each simulated experiment
+run_sim <- function(cohensd, iterations, seed = NULL) {
+    
+    # setting the seed
+    if (!is.null(seed) ) set.seed(seed)
+    
+    # produces N simulated participants in condition 1
+    x <- rnorm(n = n, mean = 0, sd = 1)
   
-  # produces N simulated participants
-  x <- rnorm(n = n, mean = 0, sd = 1)
-  
-  # produces N simulated participants when d = 0.36
-  y <- rnorm(n = n, mean = 0 + cohensd, sd = 1)
-  
-  # produces N simulated participants when d = 0
-  y_null <- rnorm(n = n, mean = 0, sd = 1)
-  
-  # produces N simulated participants when d = 0.72
-  y_double <- rnorm(n = n, mean = 0 + cohensd * 2, sd = 1)
-  
-  # computes the BF10 when d = 0.36
-  results$BF10[i] <- ttestBF(
-    x = x, y = y, paired = TRUE, rscale = "medium"
-    ) %>%
+    # produces N simulated participants in condition 2
+    y <- rnorm(n = n, mean = 0 + cohensd, sd = 1)
+    
+    # computing the BF
+    results <- ttestBF(x = x, y = y, paired = TRUE, rscale = "medium") %>%
     data.frame %>%
     pull(bf)
-  
-  # computes the BF10 when d = 0
-  results$BF10_null[i] <- ttestBF(
-    x = x, y = y_null, paired = TRUE, rscale = "medium"
-    ) %>%
-    data.frame %>%
-    pull(bf)
-  
-  # computes the BF10 when d = 0.72
-  results$BF10_double[i] <- ttestBF(
-    x = x, y = y_double, paired = TRUE, rscale = "medium"
-    ) %>%
-    data.frame %>%
-    pull(bf)
-  
+    
+    # returning the BF
+    return(results)
+    
 }
 
-# computing the proportion of simulated BFs above 1
-prop_d0 <- mean(results$BF10_null > 1)
-prop_d0.36 <- mean(results$BF10 > 1)
-prop_d0.72 <- mean(results$BF10_double > 1)
+# choosing an appropriate plan from the future package
+plan(multisession(workers = detectCores() ) )
+
+# then, running the simulations
+simulation_results <- evaluate_by_row(
+    params = params, sim_function = run_sim,
+    .progress = FALSE, system_time = FALSE
+    )
+
+# computing the proportion of "erroneous" BFs
+prop_error_d0 <- simulation_results %>% filter(cohensd == 0) %>% pull(.results)
+prop_error_d0 <- mean(prop_error_d0 > 3)
+prop_error_d0.36 <- simulation_results %>% filter(cohensd == 0.36) %>% pull(.results)
+prop_error_d0.36 <- mean(prop_error_d0.36 < 1 / 3)
+prop_error_d0.72 <- simulation_results %>% filter(cohensd == 0.72) %>% pull(.results)
+prop_error_d0.72 <- mean(prop_error_d0.72 < 1 / 3)
+
+# computing the proportion of inconclusive BFs
+prop_inconclusive_d0 <- simulation_results %>% filter(cohensd == 0) %>% pull(.results)
+prop_inconclusive_d0 <- mean(prop_inconclusive_d0 > 1/3 & prop_inconclusive_d0 < 3)
+prop_inconclusive_d0.36 <- simulation_results %>% filter(cohensd == 0.36) %>% pull(.results)
+prop_inconclusive_d0.36 <- mean(prop_inconclusive_d0.36 > 1/3 & prop_inconclusive_d0.36 < 3)
+prop_inconclusive_d0.72 <- simulation_results %>% filter(cohensd == 0.72) %>% pull(.results)
+prop_inconclusive_d0.72 <- mean(prop_inconclusive_d0.72 > 1/3 & prop_inconclusive_d0.72 < 3)
 
 # plotting the results
-results %>%
-  pivot_longer(cols = BF10:BF10_double, names_to = "type") %>%
+simulation_results %>%
   mutate(
     type = factor(
-      type,
-      levels = c("BF10_null", "BF10", "BF10_double"),
+      x = cohensd,
       labels = c("Cohen's d = 0", "Cohen's d = 0.36", "Cohen's d = 0.72")
       )
     ) %>%
+  rename(value = .results) %>%
   ggplot(aes(x = log(value), colour = type, fill = type) ) +
+  geom_rect(
+    data = data.frame(xmin = log(1 / 3), xmax = log(3), ymin = -Inf, ymax = Inf),
+    aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+    color = NA,
+    alpha = 0.25,
+    inherit.aes = FALSE
+    ) +
   geom_vline(xintercept = 0, linetype = 2) +
-  geom_vline(xintercept = log(0.278), linetype = 2, colour = "orangered") +
-  geom_histogram(colour = "white", show.legend = FALSE, bins = 40) +
+  geom_histogram(alpha = 0.5, show.legend = FALSE, bins = 60) +
+  geom_vline(xintercept = log(0.278), linetype = 1, size = 0.5, colour = "orangered") +
+  annotate(geom = "point", x = log(0.278), y = 0, colour = "orangered", size = 2) +
   theme_bw(base_size = 12, base_family = "Open Sans") +
-  facet_wrap(~ type, scales = "free_x") +
+  facet_wrap(~ type) + # , scales = "free_x") +
+  coord_cartesian(xlim = c(NA, 8) ) +
   labs(x = "Natural logarithm of the BF10", y = "Number of simulations") +
   scale_colour_brewer(palette = "Dark2", direction = 1) +
   scale_fill_brewer(palette = "Dark2", direction = 1) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.1) ) )
 ```
 
-As shown in Figure \@ref(fig:bf-dance), the distribution of log-BFs computed under each hypothesis reveals important inter-simulation variability. For instance, under the null hypothesis, `r round(prop_d0 * 100, 2)`% of the computed log-BFs are above 0 and hence support the alternative hypothesis (although the "true" effect size is $d = 0$). When the "true" effect size is of $d = 0.36$, `r round(100 - prop_d0.36 * 100, 2)`% of the log-BFs are below 0 and hence support the null hypothesis (although the true effect size is actually non-null). When the "true" effect size is of $d = 0.72$, `r round(100 - prop_d0.72 * 100, 2)`% of the log-BFs are still below 0. In other words, for small sample and effect sizes, BFs have high error rates. To assess the extent to which the BF computed for the OOI by @moffatt_inner_2020 (i.e., $\text{BF}_{10} = 0.278$) is "surprising" given or "compatible" with some effect size, we can compute the proportion of simulated BFs that are equal or more extreme than the one reported by the authors for each hypothesis, which is approximately equal to `r round(1 - mean(results$BF10_null > 0.278), 2)`, `r round(1 - mean(results$BF10 > 0.278), 2)`, and `r round(1 - mean(results$BF10_double > 0.278), 2)`, for the hypothesis of $d = 0$, $d = 0.36$, and $d = 0.72$, respectively. In other words, observing a $\text{BF}_{10} = 0.278$ is more compatible with the hypothesis of $d = 0$ (i.e., the null hypothesis) than with the hypothesis of $d = 0.36$ or $d = 0.72$, for this sample size.
+As shown in Figure \@ref(fig:bf-dance), the distribution of log-BFs computed under each hypothesis reveals important inter-simulation variability. For instance, `r round(prop_inconclusive_d0 * 100, 2)`% of the computed log-BFs under the null hypothesis are "inconclusive" and `r round(prop_error_d0 * 100, 2)`% of the log-BFs support the alternative hypothesis (although the population effect size is $d = 0$). When the population effect size is of $d = 0.36$, `r round(prop_inconclusive_d0.36 * 100, 2)`% of the computed log-BFs are "inconclusive" and `r round(prop_error_d0.36 * 100, 2)`% of the log-BFs support the null hypothesis (although the population effect size is actually non-null). When the population effect size is of $d = 0.72$, `r round(prop_inconclusive_d0.72 * 100, 2)`% of the computed log-BFs are "inconclusive" and `r round(prop_error_d0.72 * 100, 2)`% of the log-BFs support the null hypothesis. In brief, this simulations shows that for small sample and effect sizes, BFs have non-negligible error rates [see also @schonbrodt_sequential_2017].^[It should be noted that, as stressed by @rouder_optional_2014, Bayes factors indicate the relative evidence for a hypothesis, conditional on some observed data. In other words, Bayesian updating is not conditional on some hypothetical truth. With this in mind, the present simulation aims at illustrating how the frequentist properties of BFs may be used to design more informative studies [see also @schonbrodt_bayes_2018], while acknowledging that proper long-term error rates *control* is not the realm of the Bayesian framework.]
 
-<!--
-
-Second, we conducted another simulation with the aim of assessing the relation between the sample size and the value of the BF. In the previous section, we fitted a multivariate Bayesian regression model with varying-intercepts by participant and weakly informative priors on the EMG data collected by @moffatt_inner_2020. Using this model, we i) generated new datasets from the posterior predictive distribution of this model and ii) we computed the BF in favour of the alternative hypothesis ($\text{BF}_{10}$) using the `BayesFactor` package [@R-BayesFactor]. We used a "medium" prior (i.e., $r = \sqrt{2}/2$) on the scale parameter of the Cauchy prior for the alternative hypothesis. We repeated this procedure for varying sample sizes from 20 to 200 participants (by increments of 10 participants) with $1000$ simulations (i.e., 1000 simulated datasets) for each sample size.
-
-```{r simulated-power, eval = FALSE, fig.cap = "Average natural logarithm of the Bayes factor in favour of the alternative hypothesis, along with its standard error, computed over 1000 datasets of increasing size simulated from the posterior predictive distribution of the varying-intercept multivariate Bayesian regresion model, fitted on the data from Moffatt et al. (2020). A log-BF belows 0 represents evidence for the null hypothesis (relative to the alternative hypothesis) and a log-BF above 0 represents evidence for the alternative hypothesis (relative to the null hypothesis)."}
-# running the simulations
-# source("code/bf_simulation.R")
-
-# loading the results
-load(file = "results/overall_results.Rda")
-
-# simulations parameters
-nsims <- 1e3
-sample_size <- seq.int(from = 20, to = 200, by = 10)
-
-# plotting the results
-overall_results %>%
-    na.omit() %>%
-    filter_all(any_vars(. != 0) ) %>%
-    pivot_longer(cols = bf_fro:bf_oos, names_to = "bf_type") %>%
-    mutate(value = log(value) ) %>%
-    mutate(bf_type = factor(bf_type, labels = c("FRO", "OOI", "OOS") ) ) %>%
-    group_by(nobs, bf_type) %>%
-    summarise(
-        across(
-            .cols = value,
-            .fns = list(mean = mean, se = ~sd(.x) / sqrt(nsims) )
-            )
-        ) %>%
-    ungroup() %>% 
-    ggplot(aes(x = nobs, y = value_mean, colour = bf_type, fill = bf_type) ) +
-    geom_hline(yintercept = 0, lty = 3) +
-    geom_ribbon(
-        aes(
-          x = nobs, ymin = value_mean - 1.96 * value_se,
-          ymax = value_mean + 1.96 * value_se, colour = NULL
-          ),
-        alpha = 0.5, show.legend = FALSE
-        ) + 
-    geom_line(show.legend = FALSE) +
-    geom_point(show.legend = FALSE) +
-    facet_wrap(~bf_type, scales = "free") +
-    scale_x_continuous(breaks = unique(sample_size)[c(TRUE, FALSE)]) +
-    theme_bw(base_size = 10) +
-    labs(x = "Number of participants", y = "Natural logarithm of the Bayes factor") +
-    scale_colour_brewer(palette = "Dark2", direction = 1) +
-    scale_fill_brewer(palette = "Dark2", direction = 1)
-```
-
-As shown in Figure \@ref(fig:simulated-power), the natural logarithm of the BF in favour of the alternative hypothesis is growing proportionally with sample size. More precisely, whereas BFs computed on small samples (i.e., below 80 participants) support the null hypothesis, BFs computed on larger samples support the alternative hypothesis for all three facial muscles. For instance, the average $\text{BF}_{10}$ computed for the OOI muscle with a sample size of 160 participants is of $\exp(2.18) \approx 8.85$, indicating that these data are approximately $8.85$ times more likely under the alternative hypothesis than under the null hypothesis. To sum up, this reveals that although at low sample sizes, the BF may provide (weak) evidence for the null hypothesis (relative to the alternative hypothesis), this pattern may very well reverse for higher sample sizes.
-
-We should keep in mind some limitations of this analysis, which uses simulated datasets from the posterior predictive distribution estimated on the data collected by @moffatt_inner_2020. This analysis resembles to the Bayesian analogue of the frequentist post-hoc power analysis, which has been much criticised [e.g., @lakens_20_2014]. A crucial assumption of the present analysis is that the data from @moffatt_inner_2020 is our best source of information regarding the main effect of interest. However, the present analysis also differs from the frequentist post-hoc power analysis on several grounds. First, with the present analysis, we do not aim to assess the ability of our statistical test to pass some dichotomic threshold (e.g., accept/reject). Instead, we aim to assess how the $\text{BF}_{10}$ (i.e., the evidence for the alternative hypothesis, relative to the null hypothesis) behaves with varying sample sizes. Second, the present analysis relies on the posterior predictive distribution of the model fitted on the data from @moffatt_inner_2020, which naturally incorporates uncertainty about the effect of interest. By simulating datasets of varying sample sizes from the posterior predictive distribution (and by relying on a large number of simulations), uncertainty about the effect size is naturally incorporated into the results of the simulation.
-
--->
-
-The problems we discussed previously about the interpretation of under-powered non-significant results also apply to the test @moffatt_inner_2020 performed about the effect or the conditions' order. In @nalborczyk_dissociating_2021, we manipulated the modality of rumination (whether it is verbal or non-verbal) in a between-subject manner to avoid order effects and to avoid dissipating the effects of the negative mood induction. More precisely, we assumed that inducing rumination after a distraction condition in a within-subject manner would dissipate the effects of the mood induction and therefore reduce the impact of the rumination induction. In contrast to this approach, @moffatt_inner_2020 asked participants to ruminate and then distract themselves (or reciprocally), after an induced stressor (an induced failure). Anticipating again that the order of the within-subject conditions may be an issue, @moffatt_inner_2020 say:
+The problems discussed above about the interpretation of under-powered non-significant results also apply to the test @moffatt_inner_2020 performed regarding the effect or the conditions' order. In @nalborczyk_dissociating_2021, we manipulated the modality of rumination (whether it is verbal or non-verbal) in a between-subject manner to avoid order effects and to avoid dissipating the effects of the negative mood induction. More precisely, we assumed that inducing rumination after a distraction condition in a within-subject manner would dissipate the effects of the mood induction and therefore reduce the impact of the rumination induction. In contrast to this approach, @moffatt_inner_2020 asked participants to ruminate and then distract themselves (or reciprocally), after an induced stressor (an induced failure). Anticipating again that the order of the within-subject conditions may be an issue, @moffatt_inner_2020 say:
 
 > "Unless otherwise reported, the inclusion of order in which the conditions were completed as a between-subjects variable as part of a mixed-design ANOVA produced no significant main effects or interactions involving order." (p.7)
 
@@ -718,9 +446,9 @@ Unfortunately, obtaining a non-significant effect of the conditions' order is ve
 
 ## Robustness of Bayes factors to prior specifications
 
-Formulated in Bayesian terms, the problem of specifying credible effect sizes in a priori power analyses may be described as a problem of prior specification. However, defining sound prior distributions for the alternative hypothesis is notoriously difficult [for some guidance, see for instance @dienes_obtaining_2021; @dienes_how_2019]. In Figure \@ref(fig:sensitivity), we report the result of *sensitivity analyses*, depicting the value of the BF in favour of the alternative hypothesis (relative to the null hypothesis) for the difference between the distraction and rumination conditions, under various prior specifications, for each muscle.
+Formulated in Bayesian terms, the problem of specifying credible effect sizes in a priori power analyses may be described as a problem of prior specification. However, defining sound prior distributions for the alternative hypothesis is notoriously difficult [for some guidance, see for instance @dienes_obtaining_2021; @dienes_how_2019]. In Figure \@ref(fig:sensitivity), we report the results of prior *sensitivity analyses*, depicting the value of the BF in favour of the alternative hypothesis (relative to the null hypothesis) for the difference between the distraction and rumination conditions, under various prior specifications, for each muscle.
 
-```{r sensitivity, fig.pos = "!h", fig.width = 12, fig.height = 6, fig.cap = "Prior sensitivity analysis for the Bayes factor computed for each muscle (OOI, OOS, and FRO). The x-axis represents the width of the prior put on the standardised effect size (i.e., the prior for the alternative hypothesis). The y-axis represents the logarithm of the Bayes factor in favour of the alternative hypothesis. The horizontal black dashed line represents equal support (evidence) for each hypothesis. The vertical red dashed line depicts the prior width used in Moffatt et al. (2020). The gray shaded area represents the conventional (but questionable) interval in which BFs are usually considered as negligible (i.e., from 1/3 to 3)."}
+```{r sensitivity, fig.pos = "!h", fig.width = 12, fig.height = 6, fig.cap = "Prior sensitivity analysis for the Bayes factor computed for each muscle (OOI, OOS, and FRO). The x-axis represents the width of the prior put on the standardised effect size (i.e., the prior for the alternative hypothesis). The y-axis represents the logarithm of the Bayes factor in favour of the alternative hypothesis. The horizontal black dashed line represents equal support (evidence) for each hypothesis. The vertical red dashed line depicts the prior width used in Moffatt et al. (2020). The grey shaded area represents the conventional (but questionable) interval in which BFs are usually considered as inconclusive."}
 # code adapted from https://vasishth.github.io/bayescogsci/book/sec-N400BF.html
 # sensitivity analyses
 
@@ -808,7 +536,7 @@ results %>%
     geom_line(size = 0.5) +
     theme_bw(base_size = 12, base_family = "Open Sans") +
     coord_cartesian(expand = FALSE) +
-    labs(x = "Prior scale (width) for the alternative hypothesis", y = "Logarithm of the BF10") +
+    labs(x = "Prior scale (width) for the alternative hypothesis", y = "Natural logarithm of the BF10") +
     scale_x_continuous(
         limits = c(0, 1.6),
         breaks = format(seq(from = 0.1, to = 1.5, by = 0.1), digits = 2) %>% as.numeric,
@@ -834,205 +562,11 @@ results %>%
     facet_wrap(~muscle, ncol = 3)
 ```
 
-This figure strikingly reveals large variability in the resulting BF with varying prior specification. More precisely, when the scale (width) of the prior put on the standardised effect size is changed (along the x-axis), the BF changes accordingly. For instance, varying the prior scale from 0.1 to 1.0 for the OOI results in BFs from 0.78 to 0.21, respectively.
-
-<!--
-
-## Within-subject manipulation of rumination and distraction
-
-In @nalborczyk_dissociating_2021, we manipulated the modality of rumination (whether it is verbal or non-verbal) in a between-subject manner to avoid order effects and to avoid dissipating the effects of the negative mood induction. More precisely, we assumed that inducing rumination after a distraction condition in a within-subject manner would dissipate the effects of the mood induction and therefore reduce the impact of the rumination induction. In contrast to this approach, @moffatt_inner_2020 asked participants to ruminate and then distract themselves (or reciprocally), after an induced stressor (an induced failure). In Figure \@ref(fig:order), we depict again the EMG data, this time grouped by the order in which the participants went through the rumination and distraction conditions. This figure reveals some potentially interesting differences between the two groups of participants. For instance, the participants that first went through the rumination condition (in green) seem to show a higher increase in the average EMG peak amplitude  recorded over the FRO muscle from baseline than the participants that first went through the distraction condition (in orange).
-
-```{r order, eval = FALSE, fig.cap = "Average natural logarithm of the EMG peak amplitude by muscle, condition, and group. The green dots and intervals represent the by-group average and 95\\% confidence interval for the participants that first went through the rumination condition, then through the distraction condition. The orange dots and intervals represent the by-group average and 95\\% confidence interval for the participants that first went through the distraction condition, then through the rumination condition. The light green and orange dots in the background represent the individual-level average natural logarithm of the EMG amplitude by muscle, condition, and group."}
-# position for groups
-pd <- position_dodge(0.8)
-
-# plotting the data
-df2 %>%
-    # reshapes data from wide to long format
-    pivot_longer(
-        cols = FRO:OOI,
-        names_to = "muscle",
-        values_to = "value",
-        values_drop_na = TRUE
-        ) %>%
-    mutate(order = factor(order, labels = c("RUM -> DIS", "DIS -> RUM")) ) %>%
-    # plots the data
-    ggplot(aes(x = condition, y = value, colour = order, fill = order) ) +
-    # plotting individual data points
-    geom_quasirandom(alpha = 0.3) +
-    # plotting means
-    stat_summary(
-        fun.y = mean,
-        geom = "line", size = 1,
-        aes(group = interaction(muscle, order) ),
-        position = pd,
-        show.legend = FALSE
-        ) +
-    # plotting means
-    stat_summary(
-        fun.y = "mean",
-        geom = "point", shape = 16, size = 3,
-        position = pd,
-        show.legend = TRUE
-        ) +
-    # plotting confidence intervals
-    stat_summary(
-        fun.data = mean_cl_normal,
-        geom = "errorbar", size = 1, width = 0,
-        fun.args = list(mult = 1.96),
-        show.legend = FALSE,
-        position = pd
-        ) +
-    # facetting by muscle
-    facet_wrap(~muscle, ncol = 3) +
-    labs(x = "Condition", y = "Natural logarithm of peak amplitude") +
-    theme_bw(base_size = 10) +
-    scale_colour_brewer(palette = "Dark2", direction = 1) +
-    scale_fill_brewer(palette = "Dark2", direction = 1) +
-    theme(
-      legend.title = element_blank(),
-      legend.position = "top",
-      legend.background = element_rect(size = 0.5, linetype = "solid", colour = "black")
-    )
-```
-
-Anticipating again that the order of the within-subject conditions may be an issue, @moffatt_inner_2020 say:
-
-> "Unless otherwise reported, the inclusion of order in which the conditions were completed as a between-subjects variable as part of a mixed-design ANOVA produced no significant main effects or interactions involving order." (p.7)
-
-Unfortunately, the problems we discussed in the previous section about the interpretation of under-powered non-significant results also apply to this test. Namely, obtaining a non-significant effect of group is very weak evidence that order did not play a role in the results, given the low power of the tests that were performed. This statistical argument is supported by the visual exploration of the data presented in Figure \@ref(fig:order), which suggests possibly crucial differences between the two groups of participants. However, given the sample size in each group (N = 12 and N = 14), it is impossible to know for sure at this point.
-
-## Does everyone show the effect?
-
-We previously noted [e.g., @nalborczyk_orofacial_2017; @nalborczyk_dissociating_2021; @nalborczyk_understanding_2019; @nalborczyk_can_2020] that surface EMG measures of inner speech production were highly variable between individuals. This can be explained by the imagery ability of each individual, the reliability of the measurement, or the instructions that are given to the participants (and whether they are understood in a similar manner by all participants). The data collected by @moffatt_inner_2020 is no exception and presents an important degree of inter-individual variability. In Figure \@ref(fig:everyone), we represent again the EMG data for each participant (each line is a participant). We used two colours to represent the participants that showed a higher average EMG peak amplitude either in the rumination condition (in green) or in the distraction condition (in orange). As it can be seen from this figure, whereas some participants show "intermediate" or "ambiguous" (i.e., equivalent) patterns of muscular activity across conditions, some participants show a clear superior EMG peak amplitude in the rumination condition (in green) and some others in the distraction condition (in orange).
-
-```{r everyone, fig.cap = "Inter-individual variability in the main effect of interest (i.e., the difference between the rumination and distraction conditions). Green dots and lines represent the average natural logarithm of the EMG amplitude of participants that showed a higher EMG amplitude in the rumination condition than in the distraction condition, whereas orange dots and lines represent the average natural logarithm of the EMG amplitude of participants that showed a higher EMG amplitude in the distraction condition than in the rumination condition."}
-# does everyone plot
-df2 %>%
-    pivot_longer(cols = FRO:OOI, names_to = "muscle") %>%
-    pivot_wider(names_from = condition, values_from = value) %>%
-    mutate(ruminator = ifelse(RUM > DIS, 1, 0) ) %>%
-    mutate(ruminator = as.factor(ruminator) ) %>%
-    mutate(rum_dis = RUM - DIS) %>%
-    pivot_longer(cols = RUM:BAS, names_to = "condition") %>%
-    ggplot(aes(x = condition, y = value, colour = ruminator) ) +
-    # violin plots
-    geom_violin(
-        scale = "count",
-        fill = "black",
-        alpha = 0.15,
-        colour = "white",
-        position = pd,
-        draw_quantiles = 0.5,
-        show.legend = FALSE
-        ) +
-    # plotting individual data points
-    geom_point(size = 2, alpha = 0.8, show.legend = FALSE) +
-    # plotting individual trajectories
-    geom_line(aes(group = ID), size = 0.5, alpha = 0.8, show.legend = FALSE) +
-    # facetting by muscle
-    facet_wrap(~muscle) +
-    # axis labels
-    labs(x = "Condition", y = "Natural logarithm of peak amplitude") +
-    theme_bw(base_size = 10) +
-    scale_colour_brewer(palette = "Dark2", direction = -1) +
-    scale_fill_brewer(palette = "Dark2", direction = -1)
-```
-
-This important inter-individual variability calls into question the use of group averages to describe the nature of inner speech at an individual level. Moreover, this variability suggests that some important confounding factors were not taken into account (i.e., either not manipulated in the experiment or statistically controlled for). In line with @moffatt_inner_2020, we suggest these discrepancies could be explained by differences in the subjective experience of inner speech. We agree that a lot could be learnt by relating this (self-reported) subjective experience to the peripheral muscular correlates of inner speech production. However, this can not be done at the group level, at the risk of missing individual-level patterns. Therefore, we encourage @moffatt_inner_2020 to further analyse their data in order to assess whether the perioral EMG correlates (e.g., the amplitude of the difference between the rumination and distraction conditions on the OOI) can be predicted by the self-reported subjective experience, *at an individual level*.
-
-It should be noted that the question of the qualitative differences in the EMG correlates of inner speech may also be assessed more formally using the model comparison approach developed by @haaf_developing_2017. However, this would require data coming from an experimental design in which inner speech and non-inner speech conditions would be manipulated within-subject and with multiple observations for each participants in each condition [e.g., as in @nalborczyk_can_2020].
-
-## Relating the subjective inner experience to the psychophysiological correlates
-
-"Independent t-tests revealed that inner speech in the rumination condition was rated as more Condensed if it was engaged in first, compared to if it was completed second (t(29) = 3.237, p = 0.003, d = 1.163). The rumination condition was rated as involving more Positive inner speech by those who engaged in rumination first, compared to those who completed rumination second (t(29) = 2.513, p = 0.018, d = 0.903). In summary, rumination tended to involve more Condensed and Positive inner speech if engaged in first".
-
-```{r reports, eval = FALSE}
-# reshaping from wide to long
-EMG <- df %>%
-    select(ID, order = Order, RUM_FRO_MAX_ln:BAS_OOI_MAX_ln) %>%
-    na.omit %>%
-    # reshapes data from wide to long format
-    pivot_longer(
-        cols = starts_with(c("RUM", "DIS", "BAS") ),
-        names_to = "condition",
-        # names_prefix = "wk",
-        values_to = "EMG",
-        values_drop_na = TRUE
-        ) %>%
-    separate(
-        col = condition,
-        into = c("condition", "muscle"),
-        sep = "_", extra = "merge"
-        ) %>%
-    # extracts muscle name
-    mutate(muscle = substr(muscle, 1, 3) )
-
-ESM <- df %>%
-    select(ID, order = Order, DIS_Future:RUM_Thoughts) %>%
-    na.omit %>%
-    # reshapes data from wide to long format
-    pivot_longer(
-        cols = starts_with(c("RUM", "DIS") ),
-        names_to = "condition",
-        # names_prefix = "wk",
-        values_to = "ESM",
-        values_drop_na = TRUE
-        ) %>%
-    separate(
-        col = condition,
-        into = c("condition", "esm_scale"),
-        sep = "_", extra = "merge"
-        )
-
-VISQ <- df %>%
-    select(ID, order = Order, starts_with("VISQ") ) %>%
-    na.omit %>%
-    # reshapes data from wide to long format
-    pivot_longer(
-        cols = starts_with("VISQ"),
-        names_to = "visq_item",
-        # names_prefix = "wk",
-        values_to = "visq_value",
-        values_drop_na = TRUE
-        ) %>%
-    separate(
-        col = visq_item,
-        into = c("visq_item", "condition"),
-        sep = "_(?=[^_]+$)"
-        # sep = "_", extra = "merge"
-        )
-
-# MOOD <- df %>%
-#     select(ID, order = Order, PANAS_T1:VAS_Sad_T2) %>%
-#     na.omit
-
-VAS <- df %>%
-    select(ID, order = Order, VAS_Feelings_RUM:VAS_Problems_DIS) %>%
-    na.omit %>%
-    # reshapes data from wide to long format
-    pivot_longer(
-        cols = starts_with("VAS"),
-        names_to = "vas_item",
-        # names_prefix = "wk",
-        values_to = "vas_value",
-        values_drop_na = TRUE
-        ) %>%
-    separate(
-        col = vas_item,
-        into = c("vas_item", "condition"),
-        sep = "_(?=[^_]+$)"
-        # sep = "_", extra = "merge"
-        )
-
-df3 <- bind_cols(c(EMG, ESM, VAS, VISQ) )
-```
-
--->
+This figure strikingly reveals large variability in the resulting BF with various prior specifications. More precisely, when the scale (width) of the prior put on the standardised effect size is changed (along the x-axis), the BF changes accordingly. For instance, varying the prior scale from 0.1 to 1.0 for the OOI results in BFs from 0.78 to 0.21, respectively.
 
 # Discussion and conclusions
 
-With this short paper, we aimed to nuance the strong conclusion made by @moffatt_inner_2020, who asserted that the inner experience of rumination was not related to its peripheral muscular correlates. First, we discussed the statistical and epistemological reasons that cast doubt upon the main conclusion of @moffatt_inner_2020. Because the statistical tests conducted by @moffatt_inner_2020 were heavily under-powered, they provide only weak evidence for an absence of difference between conditions. Second, we highlighted that the frequentist properties of Bayesian tools (e.g., Bayes factors) provide an important piece of information that may help design more informative studies. Third, sensitivity analyses further suggested that various prior specifications may lead to different resulting Bayes factors.
+With this short paper, we aimed to nuance the strong conclusion made by @moffatt_inner_2020, who asserted that the inner experience of rumination was not related to its peripheral muscular correlates. First, we discussed the statistical and epistemological reasons that cast doubt upon the main conclusion of @moffatt_inner_2020. Because the statistical tests conducted by @moffatt_inner_2020 were heavily under-powered, they provide only weak evidence for an absence of difference between conditions. Second, we highlighted that the frequentist properties of Bayesian tools (e.g., Bayes factors) provide an important piece of information that may help design more informative studies. Third, sensitivity analyses further suggested that various prior specifications may lead to widely different Bayes factors.
 
 In addition to these methodological limitations, we now wish to discuss the theoretical interpretations and implications of these results. As discussed in the introduction section, we previously conducted several studies aiming to assess the role of the speech motor system in rumination. Following our initial study [@nalborczyk_orofacial_2017], we ran an extension in which we compared verbal to non-verbal rumination. The results suggested that the facial EMG correlates of verbal and non-verbal rumination were similar [@nalborczyk_dissociating_2021]. Given the ample evidence on the EMG correlates of inner speech production [for an overview, see Chapter 1 in @nalborczyk_understanding_2019], we needed to explain why this particular form of inner speech (induced rumination) was not associated with speech-specific peripheral muscular activity.
 
@@ -1042,23 +576,17 @@ Another possible interpretation is that automatic forms of inner speech may rely
 
 To conclude, we wish to bring some nuance to the conclusion of @moffatt_inner_2020, who stated that "In conclusion, induced rumination appeared to involve similar levels of inner speech-related muscle activity to a period of distraction" (p.14). In consideration of the limitations discussed in the present article, this conclusion seems hasty. Indeed, we provided theoretical (epistemological) and empirical (via simulation and sensitivity analyses) reasons to doubt the strength of the evidence in favour of the null hypothesis in this study. This commentary stresses the importance of planning adequately-powered studies of induced rumination, and the need for more thoughtful statistical analyses and data interpretation, as recommended by @wasserstein_moving_2019.
 
-<!--
-
-Moreover, supplementary analyses showed that the order of the conditions participants went through may have influenced the effects of the rumination induction on the EMG correlates. Finally, important under-explored inter-individual variability suggests that important determinants of these correlates were not taken into account.
-
--->
-
 # Acknowledgements {-}
 
-We thank Antonio Schettino for suggesting to include the "Dance of the Bayes factors" simulation and for providing helpful comments on a previous version of this manuscript. Thanks to Daniel Lakens and two anonymous reviewers for valuable comments on previous versions of this manuscript.
+We thank Antonio Schettino for suggesting to include the "Dance of the Bayes factors" simulation and for providing helpful comments on a previous version of this manuscript. We also thank Daniel Lakens and two anonymous reviewers for valuable comments on previous versions of this manuscript.
 
 # Funding information
 
-This project did not benefit from any specific funding.
+This work, partly carried out within the Institut Convergence ILCB (ANR-16-CONV-0002), has benefited from support from the French government, managed by the French National Agency for Research (ANR) and the Excellence Initiative of Aix-Marseille University (A*MIDEX).
 
 # Data accessibility {#supp}
 
-Reproducible code for the manuscript, analyses, and figures is available at [https://osf.io/ba3gk/](https://osf.io/ba3gk/).
+The full code used to produce the manuscript, analyses, and figures, is available at [https://osf.io/ba3gk/](https://osf.io/ba3gk/).
 
 <!--
 
